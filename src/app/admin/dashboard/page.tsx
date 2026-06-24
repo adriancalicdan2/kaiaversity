@@ -31,32 +31,37 @@ export default async function AdminDashboardPage() {
   }
 
   // ── Stats ──
-  const [[postCount], [userCount], [commentCount], [enrollCount], [submissionCount], [eventCount]] =
-    await Promise.all([
-      db.select({ count: count() }).from(posts),
-      db.select({ count: count() }).from(users),
-      db.select({ count: count() }).from(comments),
-      db.select({ count: count() }).from(courseEnrollments),
-      db.select({ count: count() }).from(courseSubmissions),
-      db.select({ count: count() }).from(events),
-    ]);
-
-  // Total points awarded
-  const [pointsResult] = await db.select({ total: sum(pointTransactions.amount) }).from(pointTransactions);
+  // Fetch stats, total points, recent users, and pending submissions in parallel
+  const [
+    [postCount],
+    [userCount],
+    [commentCount],
+    [enrollCount],
+    [submissionCount],
+    [eventCount],
+    [pointsResult],
+    recentUsers,
+    pendingSubmissions
+  ] = await Promise.all([
+    db.select({ count: count() }).from(posts),
+    db.select({ count: count() }).from(users),
+    db.select({ count: count() }).from(comments),
+    db.select({ count: count() }).from(courseEnrollments),
+    db.select({ count: count() }).from(courseSubmissions),
+    db.select({ count: count() }).from(events),
+    db.select({ total: sum(pointTransactions.amount) }).from(pointTransactions),
+    db.query.users.findMany({
+      orderBy: [desc(users.joinedAt)],
+      limit: 6,
+    }),
+    db.query.courseSubmissions.findMany({
+      where: (s, { eq }) => eq(s.status, "PENDING"),
+      orderBy: [desc(courseSubmissions.submittedAt)],
+      limit: 5,
+    }),
+  ]);
+ 
   const totalPoints = Number(pointsResult?.total ?? 0);
-
-  // Recent users
-  const recentUsers = await db.query.users.findMany({
-    orderBy: [desc(users.joinedAt)],
-    limit: 6,
-  });
-
-  // Pending submissions
-  const pendingSubmissions = await db.query.courseSubmissions.findMany({
-    where: (s, { eq }) => eq(s.status, "PENDING"),
-    orderBy: [desc(courseSubmissions.submittedAt)],
-    limit: 5,
-  });
 
   const stats = [
     { label: "Enrolled ZAIAs",   value: userCount?.count ?? 0,        icon: Users, color: "#8B5CF6", href: "/admin/users" },

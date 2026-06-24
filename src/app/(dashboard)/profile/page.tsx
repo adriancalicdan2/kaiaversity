@@ -36,19 +36,19 @@ export default async function ProfilePage() {
   const session = await auth();
   if (!session?.user?.id) return null;
 
-  const user = await db.query.users.findFirst({
-    where: eq(users.id, session.user.id),
-  });
-
-  const earnedAchievements = await db.query.userAchievements.findMany({
-    where: eq(userAchievements.userId, session.user.id),
-  });
-
-  const recentTransactions = await db.query.pointTransactions.findMany({
-    where: eq(pointTransactions.userId, session.user.id),
-    orderBy: [desc(pointTransactions.createdAt)],
-    limit: 10,
-  });
+  const [user, earnedAchievements, recentTransactions] = await Promise.all([
+    db.query.users.findFirst({
+      where: eq(users.id, session.user.id),
+    }),
+    db.query.userAchievements.findMany({
+      where: eq(userAchievements.userId, session.user.id),
+    }),
+    db.query.pointTransactions.findMany({
+      where: eq(pointTransactions.userId, session.user.id),
+      orderBy: [desc(pointTransactions.createdAt)],
+      limit: 10,
+    }),
+  ]);
 
   const { current, next, progress, pointsNeeded } = getProgressToNextLevel(user?.points ?? 0);
   const favMember = KAIA_MEMBERS.find((m) => m.slug === user?.favoriteMember);

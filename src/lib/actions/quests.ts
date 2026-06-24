@@ -88,90 +88,102 @@ export async function checkAndSyncDailyQuests() {
   const startOfToday = new Date(`${todayKey}T00:00:00+08:00`);
   const endOfToday = new Date(`${todayKey}T23:59:59+08:00`);
 
-  // 1. Auto-complete login quest (user is active because they are loading the page)
-  try {
-    await completeQuest("quest-daily-login");
-  } catch (e) {
-    console.error("Login quest error:", e);
-  }
-
-  // 2. Query completed modules today
-  let modulesCount = 0;
-  try {
-    const completedModules = await db.query.courseModuleProgress.findMany({
-      where: and(
-        eq(courseModuleProgress.userId, userId),
-        eq(courseModuleProgress.completed, true),
-        gte(courseModuleProgress.completedAt, startOfToday),
-        lte(courseModuleProgress.completedAt, endOfToday)
-      ),
-    });
-    modulesCount = completedModules.length;
-  } catch (e) {
-    console.error("Fetch completed modules error:", e);
-  }
-
-  // 3. Query likes today
-  let likesCount = 0;
-  try {
-    const likes = await db.query.postLikes.findMany({
-      where: and(
-        eq(postLikes.userId, userId),
-        gte(postLikes.createdAt, startOfToday),
-        lte(postLikes.createdAt, endOfToday)
-      ),
-    });
-    likesCount = likes.length;
-  } catch (e) {
-    console.error("Fetch likes error:", e);
-  }
-
-  // 4. Query comments today
-  let commentsCount = 0;
-  try {
-    const userComments = await db.query.comments.findMany({
-      where: and(
-        eq(comments.userId, userId),
-        gte(comments.createdAt, startOfToday),
-        lte(comments.createdAt, endOfToday)
-      ),
-    });
-    commentsCount = userComments.length;
-  } catch (e) {
-    console.error("Fetch comments error:", e);
-  }
-
-  // 5. Check and complete each quest type based on real function rules
-  if (modulesCount >= 1) {
-    try {
-      await completeQuest("quest-read-lecture");
-      await completeQuest("quest-professor-spotlight");
-    } catch (e) {}
-  }
-
-  if (likesCount >= 1 && commentsCount >= 1 && (likesCount + commentsCount) >= 3) {
-    try {
-      await completeQuest("quest-show-love");
-    } catch (e) {}
-  }
-
-  if (likesCount >= 5) {
-    try {
-      await completeQuest("quest-fan-art");
-    } catch (e) {}
-  }
-
-  if (commentsCount >= 3) {
-    try {
-      await completeQuest("quest-community-helper");
-    } catch (e) {}
-  }
-
-  // Return all user quest completions for today
-  return db.query.userQuests.findMany({
+  // Fetch all user completions for today first (saves separate queries later)
+  const completions = await db.query.userQuests.findMany({
     where: and(
       eq(userQuests.userId, userId),
       eq(userQuests.dateKey, todayKey)
     ),
   });
+
+  const completedQuestIds = new Set(
+    completions.filter((q) => q.completed).map((q) => q.questId)
+  );
+
+  // 1. Auto-complete login quest if not already done
+  if (!completedQuestIds.has("quest-daily-login")) {
+    try {
+      await completeQuest("quest-daily-login");
+      completedQuestIds.add("quest-daily-login");
+    } catch (e) {
+      console.error("Login quest error:", e);
+    }
+  }
+
+  // 2. Query completed modules, likes, and comments today in parallel
+  let modulesCount = 0;
+  let likesCount = 0;
+  let commentsCount = 0;
+  try {
+    const [completedModules, likes, userComments] = await Promise.all([
+      db.query.courseModuleProgress.findMany({
+        where: and(
+          eq(courseModuleProgress.userId, userId),
+          eq(courseModuleProgress.completed, true),
+          gte(courseModuleProgress.completedAt, startOfToday),
+          lte(courseModuleProgress.completedAt, endOfToday)
+        ),
+      }),
+      db.query.postLikes.findMany({
+        where: and(
+          eq(postLikes.userId, userId),
+          gte(postLikes.createdAt, startOfToday),
+          lte(postLikes.createdAt, endOfToday)
+        ),
+      }),
+      db.query.comments.findMany({
+        where: and(
+          eq(comments.userId, userId),
+          gte(comments.createdAt, startOfToday),
+          lte(comments.createdAt, endOfToday)
+        ),
+      }),
+    ]);
+    modulesCount = completedModules.length;
+    likesCount = likes.length;
+    commentsCount = userComments.length;
+  } catch (e) {
+    console.error("Fetch daily stats error:", e);
+  }
+
+  // 3. Complete other quests based on activity, only if not already completed
+  if (modulesCount >= 1) {
+    if (!completedQuestIds.has("quest-read-lecture")) {
+      try { await completeQuest("quest-read-lecture"); } catch (e) {}
+    }
+    if (!completedQuestIds.has("quest-professor-spotlight")) {
+      try { await completeQuest("quest-professor-spotlight"); } catch (e) {}
+    }
+  }
+
+  if (likesCount >= 1 && commentsCount >= 1 && (likesCount + commentsCount) >= 3) {
+    if (!completedQuestIds.has("quest-show-love")) {
+      try { await completeQuest("quest-show-love"); } catch (e) {}
+    }
+  }
+
+  if (likesCount >= 5) {
+    if (!completedQuestIds.has("quest-fan-art")) {
+      try { await completeQuest("quest-fan-art"); } catch (e) {}
+    }
+  }
+
+  if (commentsCount >= 3) {
+    if (!completedQuestIds.has("quest-community-helper")) {
+      try { await completeQuest("quest-community-helper"); } catch (e) {}
+    }
+  }
+
+  // Final fetch of the day's quest completions (only if some quests were newly completed)
+  const newlyCompleted = completedQuestIds.size > completions.filter((q) => q.completed).length;
+  if (newlyCompleted) {
+    return db.query.userQuests.findMany({
+      where: and(
+        eq(userQuests.userId, userId),
+        eq(userQuests.dateKey, todayKey)
+      ),
+    });
+  }
+
+  return completions;
 }

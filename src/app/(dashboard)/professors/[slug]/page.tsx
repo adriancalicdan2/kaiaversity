@@ -68,36 +68,39 @@ export default async function MemberProfilePage({ params }: Props) {
     redirect("/admissions");
   }
 
-  const memberPosts = await db.query.posts.findMany({
-    where: and(eq(posts.memberId, member.id), eq(posts.published, true)),
-    orderBy: [desc(posts.createdAt)],
-    limit: 20,
-  });
-
-  // Fetch the user's liked posts to determine initialLiked state
-  const likedPosts = await db.query.postLikes.findMany({
-    where: eq(postLikes.userId, session.user.id),
-  });
+  // Fetch member posts, liked posts, courses, and course enrollments in parallel
+  const [memberPosts, likedPosts, memberCourses, enrollments] = await Promise.all([
+    db.query.posts.findMany({
+      where: and(eq(posts.memberId, member.id), eq(posts.published, true)),
+      orderBy: [desc(posts.createdAt)],
+      limit: 20,
+    }),
+    db.query.postLikes.findMany({
+      where: eq(postLikes.userId, session.user.id),
+    }),
+    db.query.courses.findMany({
+      where: and(
+        eq(courses.memberId, member.id),
+        eq(courses.isActive, true)
+      ),
+      orderBy: [asc(courses.minLevel)],
+    }),
+    db.query.courseEnrollments.findMany({
+      where: eq(courseEnrollments.userId, session.user.id),
+    }),
+  ]);
+ 
   const likedPostIds = new Set(likedPosts.map((l) => l.postId));
-
-  const memberCourses = await db.query.courses.findMany({
-    where: and(
-      eq(courses.memberId, member.id),
-      eq(courses.isActive, true)
-    ),
-    orderBy: [asc(courses.minLevel)],
-  });
-
-  const enrollments = await db.query.courseEnrollments.findMany({
-    where: eq(courseEnrollments.userId, session.user.id),
-  });
-
+ 
   const uniqueLevels = Array.from(new Set(memberCourses.map((c) => c.minLevel)));
   const levelUnlockStatuses: Record<number, { unlocked: boolean; reason?: string }> = {};
-
-  for (const lvl of uniqueLevels) {
-    levelUnlockStatuses[lvl] = await isLevelUnlockedForUser(session.user.id, lvl, member.id);
-  }
+ 
+  // Check level unlock status for all levels in parallel
+  await Promise.all(
+    uniqueLevels.map(async (lvl) => {
+      levelUnlockStatuses[lvl] = await isLevelUnlockedForUser(session.user.id, lvl, member.id);
+    })
+  );
 
   return (
     <div style={{ maxWidth: 900, margin: "0 auto" }}>

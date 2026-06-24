@@ -22,15 +22,14 @@ export default async function AdminEventsPage() {
     redirect("/dashboard");
   }
 
-  const allEvents = await db.query.events.findMany({
-    orderBy: [desc(events.createdAt)],
-  });
-
-  // Fetch host members separately
-  const memberIds = [...new Set(allEvents.map((e) => e.hostMemberId).filter(Boolean))] as string[];
-  const membersArr = memberIds.length > 0
-    ? await db.query.members.findMany({ where: (m, { inArray }) => inArray(m.id, memberIds) })
-    : [];
+  // Fetch events and members in parallel (only 5 members total, so safe to fetch all)
+  const [allEvents, membersArr] = await Promise.all([
+    db.query.events.findMany({
+      orderBy: [desc(events.createdAt)],
+    }),
+    db.query.members.findMany(),
+  ]);
+ 
   const memberMap = Object.fromEntries(membersArr.map((m) => [m.id, m]));
 
   return (

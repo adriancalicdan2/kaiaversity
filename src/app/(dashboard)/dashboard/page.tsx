@@ -25,20 +25,20 @@ export default async function DashboardPage() {
   const session = await auth();
   if (!session?.user?.id) return null;
 
-  // Fetch recent posts
-  const recentPosts = await db.query.posts.findMany({
-    where: eq(posts.published, true),
-    orderBy: [desc(posts.createdAt)],
-    limit: 10,
-  });
-
-  // Fetch the user's liked posts to determine initialLiked state
-  const likedPosts = await db.query.postLikes.findMany({
-    where: eq(postLikes.userId, session.user.id),
-  });
+  // Fetch recent posts, liked posts, and sync daily quests in parallel
+  const [recentPosts, likedPosts, todayQuestStatus] = await Promise.all([
+    db.query.posts.findMany({
+      where: eq(posts.published, true),
+      orderBy: [desc(posts.createdAt)],
+      limit: 10,
+    }),
+    db.query.postLikes.findMany({
+      where: eq(postLikes.userId, session.user.id),
+    }),
+    checkAndSyncDailyQuests(),
+  ]);
+ 
   const likedPostIds = new Set(likedPosts.map((l) => l.postId));
-
-  const todayQuestStatus = await checkAndSyncDailyQuests();
   const completedQuestIds = todayQuestStatus
     .filter((q) => q.completed)
     .map((q) => q.questId);

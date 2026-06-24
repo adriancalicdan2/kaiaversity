@@ -20,21 +20,23 @@ export default async function AdminCourseDetailPage({
     redirect("/dashboard");
   }
 
-  const course = await db.query.courses.findFirst({
-    where: eq(courses.id, params.id),
-  });
-
+  // Fetch course details and modules list in parallel
+  const [course, modules] = await Promise.all([
+    db.query.courses.findFirst({
+      where: eq(courses.id, params.id),
+    }),
+    db.query.courseModules.findMany({
+      where: eq(courseModules.courseId, params.id),
+      orderBy: [asc(courseModules.order)],
+    }),
+  ]);
+ 
   if (!course) notFound();
-
+ 
   // Fetch member separately
   const member = course.memberId
     ? await db.query.members.findFirst({ where: (m, { eq }) => eq(m.id, course.memberId!) })
     : null;
-
-  const modules = await db.query.courseModules.findMany({
-    where: eq(courseModules.courseId, params.id),
-    orderBy: [asc(courseModules.order)],
-  });
 
   return (
     <div style={{ padding: "32px 36px", maxWidth: 900, margin: "0 auto" }}>

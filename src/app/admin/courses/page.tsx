@@ -23,29 +23,28 @@ export default async function AdminCoursesPage() {
     redirect("/dashboard");
   }
 
-  const allCourses = await db.query.courses.findMany({
-    orderBy: [desc(courses.order)],
-  });
-
+  // Fetch courses, enrollment counts, and module counts in parallel
+  const [allCourses, enrollmentCounts, moduleCounts] = await Promise.all([
+    db.query.courses.findMany({
+      orderBy: [desc(courses.order)],
+    }),
+    db
+      .select({ courseId: courseEnrollments.courseId, count: count() })
+      .from(courseEnrollments)
+      .groupBy(courseEnrollments.courseId),
+    db
+      .select({ courseId: courseModules.courseId, count: count() })
+      .from(courseModules)
+      .groupBy(courseModules.courseId),
+  ]);
+ 
   // Fetch members separately
   const memberIds = [...new Set(allCourses.map((c) => c.memberId).filter(Boolean))] as string[];
   const membersArr = memberIds.length > 0
     ? await db.query.members.findMany({ where: (m, { inArray }) => inArray(m.id, memberIds) })
     : [];
   const memberMap = Object.fromEntries(membersArr.map((m) => [m.id, m]));
-
-  // Enrollment counts per course
-  const enrollmentCounts = await db
-    .select({ courseId: courseEnrollments.courseId, count: count() })
-    .from(courseEnrollments)
-    .groupBy(courseEnrollments.courseId);
   const enrollMap = Object.fromEntries(enrollmentCounts.map((e) => [e.courseId, e.count]));
-
-  // Module counts per course
-  const moduleCounts = await db
-    .select({ courseId: courseModules.courseId, count: count() })
-    .from(courseModules)
-    .groupBy(courseModules.courseId);
   const moduleMap = Object.fromEntries(moduleCounts.map((m) => [m.courseId, m.count]));
 
   return (

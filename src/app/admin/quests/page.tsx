@@ -15,16 +15,17 @@ export default async function AdminQuestsPage() {
     redirect("/dashboard");
   }
 
-  const allQuests = await db.query.quests.findMany({
-    orderBy: (q, { asc }) => [asc(q.order)],
-  });
-
-  // Completion counts per quest
-  const completionCounts = await db
-    .select({ questId: userQuests.questId, count: count() })
-    .from(userQuests)
-    .where(eq(userQuests.completed, true))
-    .groupBy(userQuests.questId);
+  // Fetch quests and completion counts in parallel
+  const [allQuests, completionCounts] = await Promise.all([
+    db.query.quests.findMany({
+      orderBy: (q, { asc }) => [asc(q.order)],
+    }),
+    db
+      .select({ questId: userQuests.questId, count: count() })
+      .from(userQuests)
+      .where(eq(userQuests.completed, true))
+      .groupBy(userQuests.questId),
+  ]);
 
   const completionMap = Object.fromEntries(completionCounts.map((c) => [c.questId, c.count]));
 
