@@ -1,0 +1,194 @@
+import { auth } from "@/lib/auth";
+import { db } from "@/lib/db";
+import { users, userAchievements, pointTransactions } from "@/lib/db/schema";
+import { eq, desc } from "drizzle-orm";
+import { ACHIEVEMENTS } from "@/lib/constants/achievements";
+import { getProgressToNextLevel } from "@/lib/constants/levels";
+import { KAIA_MEMBERS } from "@/lib/constants/members";
+import { formatTimeAgo } from "@/lib/utils";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = { title: "My Profile" };
+
+export default async function ProfilePage() {
+  const session = await auth();
+  if (!session?.user?.id) return null;
+
+  const user = await db.query.users.findFirst({
+    where: eq(users.id, session.user.id),
+  });
+
+  const earnedAchievements = await db.query.userAchievements.findMany({
+    where: eq(userAchievements.userId, session.user.id),
+  });
+
+  const recentTransactions = await db.query.pointTransactions.findMany({
+    where: eq(pointTransactions.userId, session.user.id),
+    orderBy: [desc(pointTransactions.createdAt)],
+    limit: 10,
+  });
+
+  const { current, next, progress, pointsNeeded } = getProgressToNextLevel(user?.points ?? 0);
+  const favMember = KAIA_MEMBERS.find((m) => m.slug === user?.favoriteMember);
+  const earnedIds = new Set(earnedAchievements.map((e) => e.achievementId));
+
+  return (
+    <div style={{ padding: "28px 32px", maxWidth: 800, margin: "0 auto" }}>
+      <h1 style={{ fontSize: 28, fontWeight: 800, color: "white", marginBottom: 28 }}>
+        👤 My Profile
+      </h1>
+
+      {/* Profile card */}
+      <div
+        style={{
+          background: "linear-gradient(135deg, rgba(139,92,246,0.15), rgba(255,107,157,0.1))",
+          border: "1px solid rgba(139,92,246,0.25)",
+          borderRadius: 20, padding: "28px", marginBottom: 24,
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "center", gap: 20, flexWrap: "wrap" }}>
+          {/* Avatar */}
+          <div
+            style={{
+              width: 80, height: 80, borderRadius: "50%",
+              background: "rgba(139,92,246,0.2)",
+              border: "3px solid rgba(139,92,246,0.5)",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              fontSize: 40, overflow: "hidden", flexShrink: 0,
+            }}
+          >
+            {session.user.image ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={session.user.image} alt="avatar" style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "50%" }} />
+            ) : "🎓"}
+          </div>
+
+          <div style={{ flex: 1 }}>
+            <p style={{ color: "#a78bfa", fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", marginBottom: 2 }}>ZAIA STUDENT</p>
+            <h2 style={{ color: "white", fontWeight: 800, fontSize: 22 }}>{session.user.name}</h2>
+            <p style={{ color: "#64748b", fontSize: 13 }}>{session.user.email}</p>
+            {favMember && (
+              <p style={{ color: favMember.color, fontSize: 13, marginTop: 4 }}>
+                {favMember.emoji} Favorite Professor: {favMember.name}
+              </p>
+            )}
+          </div>
+
+          <div style={{ textAlign: "center" }}>
+            <div style={{ fontSize: 36 }}>{current.badge}</div>
+            <p style={{ color: current.color, fontWeight: 700, fontSize: 14 }}>{current.title}</p>
+            <p style={{ color: "#475569", fontSize: 12 }}>Level {current.level}</p>
+          </div>
+
+          <div style={{ textAlign: "right" }}>
+            <p
+              style={{
+                fontSize: 36, fontWeight: 900,
+                background: "linear-gradient(135deg, #FF6B9D, #8B5CF6)",
+                WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text",
+              }}
+            >
+              {(user?.points ?? 0).toLocaleString()}
+            </p>
+            <p style={{ color: "#475569", fontSize: 12 }}>Total Points</p>
+            {next && <p style={{ color: "#334155", fontSize: 11 }}>{pointsNeeded} to next level</p>}
+          </div>
+        </div>
+
+        {/* Progress bar */}
+        {next && (
+          <div style={{ marginTop: 20 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, color: "#475569", marginBottom: 6 }}>
+              <span>{current.title}</span>
+              <span>{progress}%  →  {next.title}</span>
+            </div>
+            <div style={{ height: 6, background: "rgba(255,255,255,0.08)", borderRadius: 99 }}>
+              <div
+                style={{
+                  height: "100%", width: `${progress}%`, borderRadius: 99,
+                  background: `linear-gradient(90deg, ${current.color}, ${next.color})`,
+                }}
+              />
+            </div>
+          </div>
+        )}
+      </div>
+
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
+        {/* Earned badges */}
+        <div
+          style={{
+            background: "rgba(255,255,255,0.04)",
+            border: "1px solid rgba(255,255,255,0.07)",
+            borderRadius: 16, padding: "20px",
+          }}
+        >
+          <h3 style={{ color: "white", fontWeight: 700, fontSize: 16, marginBottom: 14 }}>
+            🏆 Badges ({earnedAchievements.length})
+          </h3>
+          {earnedAchievements.length === 0 ? (
+            <p style={{ color: "#475569", fontSize: 13 }}>No badges yet. Start engaging!</p>
+          ) : (
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+              {ACHIEVEMENTS.filter((a) => earnedIds.has(a.id)).map((ach) => (
+                <div
+                  key={ach.id}
+                  title={ach.name}
+                  style={{
+                    width: 44, height: 44, borderRadius: 10,
+                    background: "rgba(139,92,246,0.12)",
+                    border: "1px solid rgba(139,92,246,0.25)",
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    fontSize: 22, cursor: "default",
+                  }}
+                >
+                  {ach.icon}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Point history */}
+        <div
+          style={{
+            background: "rgba(255,255,255,0.04)",
+            border: "1px solid rgba(255,255,255,0.07)",
+            borderRadius: 16, padding: "20px",
+          }}
+        >
+          <h3 style={{ color: "white", fontWeight: 700, fontSize: 16, marginBottom: 14 }}>
+            ⚡ Recent Points
+          </h3>
+          {recentTransactions.length === 0 ? (
+            <p style={{ color: "#475569", fontSize: 13 }}>No activity yet.</p>
+          ) : (
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              {recentTransactions.map((tx) => (
+                <div
+                  key={tx.id}
+                  style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}
+                >
+                  <div>
+                    <p style={{ color: "#cbd5e1", fontSize: 13 }}>{tx.reason}</p>
+                    <p style={{ color: "#475569", fontSize: 11 }}>
+                      {tx.createdAt ? formatTimeAgo(tx.createdAt) : ""}
+                    </p>
+                  </div>
+                  <span
+                    style={{
+                      fontWeight: 700, fontSize: 14,
+                      color: tx.amount > 0 ? "#34d399" : "#f87171",
+                    }}
+                  >
+                    {tx.amount > 0 ? "+" : ""}{tx.amount}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}

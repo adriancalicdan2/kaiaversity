@@ -1,26 +1,168 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+/* ============================================================
+   KAIAVERSITY — Global CSS
+   ============================================================ */
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
+@layer base {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    /* Brand palette */
+    --kaia-pink:    #FF6B9D;
+    --kaia-purple:  #8B5CF6;
+    --kaia-cyan:    #06B6D4;
+    --kaia-dark:    #0A0A0F;
+    --kaia-darker:  #050508;
+    --kaia-card:    rgba(255,255,255,0.04);
+    --kaia-border:  rgba(255,255,255,0.08);
+    --kaia-text:    #F1F5F9;
+    --kaia-muted:   #94a3b8;
+
+    /* Member colors */
+    --angela-color:   #8B4513;
+    --charice-color:  #DE3163;
+    --alexa-color:    #FFD700;
+    --sophia-color:   #FF2400;
+    --charlotte-color:#98FF98;
+
+    --background: var(--kaia-dark);
+    --foreground: var(--kaia-text);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background-color: var(--kaia-dark);
+    color: var(--kaia-text);
+    font-family: "Inter", "Outfit", system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar       { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--kaia-darker); }
+  ::-webkit-scrollbar-thumb { background: rgba(139,92,246,0.5); border-radius: 3px; }
+}
+
+@layer components {
+  /* Glass card */
+  .glass {
+    background: var(--kaia-card);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--kaia-border);
+    border-radius: 16px;
+  }
+
+  /* Gradient text */
+  .gradient-text {
+    background: linear-gradient(135deg, var(--kaia-pink), var(--kaia-purple), var(--kaia-cyan));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Glow button */
+  .btn-glow {
+    position: relative;
+    background: linear-gradient(135deg, var(--kaia-pink), var(--kaia-purple));
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 12px 28px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    overflow: hidden;
+  }
+  .btn-glow::before {
+    content: "";
+    position: absolute;
+    inset: -2px;
+    background: linear-gradient(135deg, var(--kaia-pink), var(--kaia-purple), var(--kaia-cyan));
+    border-radius: 14px;
+    z-index: -1;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .btn-glow:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(255,107,157,0.4); }
+  .btn-glow:hover::before { opacity: 1; }
+
+  /* Member card hover */
+  .member-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  .member-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+  }
+
+  /* Rarity badge colors */
+  .rarity-common    { color: #94a3b8; border-color: #94a3b8; }
+  .rarity-rare      { color: #60a5fa; border-color: #60a5fa; }
+  .rarity-epic      { color: #a78bfa; border-color: #a78bfa; }
+  .rarity-legendary { color: #f59e0b; border-color: #f59e0b; box-shadow: 0 0 12px rgba(245,158,11,0.4); }
+
+  /* Animated background grid */
+  .bg-grid {
+    background-image:
+      linear-gradient(rgba(139,92,246,0.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(139,92,246,0.05) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+
+  /* Sidebar nav item */
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    border-radius: 10px;
+    color: var(--kaia-muted);
+    text-decoration: none;
+    transition: all 0.2s ease;
+    font-size: 14px;
+    font-weight: 500;
+  }
+  .nav-item:hover { background: rgba(139,92,246,0.12); color: var(--kaia-text); }
+  .nav-item.active { background: rgba(139,92,246,0.2); color: white; }
+
+  /* Post type badge */
+  .post-type-lecture      { background: rgba(6,182,212,0.15);  color: #06b6d4; }
+  .post-type-diary        { background: rgba(236,72,153,0.15); color: #ec4899; }
+  .post-type-announcement { background: rgba(245,158,11,0.15); color: #f59e0b; }
+  .post-type-assignment   { background: rgba(16,185,129,0.15); color: #10b981; }
+
+  /* Shimmer animation for loading skeletons */
+  .shimmer {
+    background: linear-gradient(90deg, rgba(255,255,255,0.03) 25%, rgba(255,255,255,0.07) 50%, rgba(255,255,255,0.03) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
 }
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-10px); }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 20px rgba(139,92,246,0.3); }
+  50%       { box-shadow: 0 0 40px rgba(139,92,246,0.6); }
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.animate-float     { animation: float 3s ease-in-out infinite; }
+.animate-pulse-glow { animation: pulse-glow 2s ease-in-out infinite; }
+.animate-fade-in-up { animation: fadeInUp 0.5s ease forwards; }
