@@ -3,34 +3,47 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
+import {
+  LayoutDashboard,
+  Users,
+  Edit3,
+  ClipboardList,
+  GraduationCap,
+  Target,
+  Award,
+  Calendar,
+  Settings,
+  Eye,
+  LogOut
+} from "lucide-react";
 
 const NAV_SECTIONS = [
   {
     group: "Overview",
     items: [
-      { href: "/admin/dashboard", icon: "📊", label: "Dashboard" },
+      { href: "/admin/dashboard", icon: LayoutDashboard, label: "Dashboard" },
     ],
   },
   {
     group: "Manage",
     items: [
-      { href: "/admin/users",        icon: "👥", label: "Users" },
-      { href: "/admin/content",      icon: "✍️",  label: "Content" },
-      { href: "/admin/submissions",  icon: "📋", label: "Submissions" },
+      { href: "/admin/users",        icon: Users, label: "Users" },
+      { href: "/admin/content",      icon: Edit3,  label: "Content" },
+      { href: "/admin/submissions",  icon: ClipboardList, label: "Submissions" },
     ],
   },
   {
     group: "Campus",
     items: [
-      { href: "/admin/courses",      icon: "🎓", label: "Courses" },
-      { href: "/admin/quests",       icon: "🎯", label: "Quests" },
-      { href: "/admin/achievements", icon: "🏅", label: "Achievements" },
+      { href: "/admin/courses",      icon: GraduationCap, label: "Courses" },
+      { href: "/admin/quests",       icon: Target, label: "Quests" },
+      { href: "/admin/achievements", icon: Award, label: "Achievements" },
     ],
   },
   {
     group: "Events",
     items: [
-      { href: "/admin/events", icon: "🏆", label: "Events" },
+      { href: "/admin/events", icon: Calendar, label: "Events" },
     ],
   },
 ];
@@ -85,11 +98,11 @@ export function AdminSidebar({ userName, userRole, userPoints }: Props) {
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              fontSize: 16,
+              color: "#0A0A0F",
               flexShrink: 0,
             }}
           >
-            ⚙️
+            <Settings size={18} />
           </div>
           <div>
             <div style={{ fontSize: 13, fontWeight: 800, color: "white", lineHeight: 1.2 }}>
@@ -145,6 +158,7 @@ export function AdminSidebar({ userName, userRole, userPoints }: Props) {
             </div>
             {section.items.map((item) => {
               const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
+              const Icon = item.icon;
               return (
                 <Link
                   key={item.href}
@@ -167,7 +181,7 @@ export function AdminSidebar({ userName, userRole, userPoints }: Props) {
                     marginBottom: 2,
                   }}
                 >
-                  <span style={{ fontSize: 15 }}>{item.icon}</span>
+                  <Icon size={15} style={{ opacity: isActive ? 1 : 0.7 }} />
                   {item.label}
                 </Link>
               );
@@ -200,7 +214,7 @@ export function AdminSidebar({ userName, userRole, userPoints }: Props) {
             transition: "color 0.15s",
           }}
         >
-          👁 View as Student
+          <Eye size={14} /> View as Student
         </Link>
         <button
           onClick={() => signOut({ callbackUrl: "/admissions" })}
@@ -219,7 +233,7 @@ export function AdminSidebar({ userName, userRole, userPoints }: Props) {
             textAlign: "left",
           }}
         >
-          🚪 Sign Out
+          <LogOut size={14} /> Sign Out
         </button>
       </div>
     </aside>

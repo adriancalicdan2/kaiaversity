@@ -4,17 +4,45 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { KAIA_MEMBERS } from "@/lib/constants/members";
 import { signOut } from "next-auth/react";
+import {
+  Home,
+  Users2,
+  BookOpen,
+  Trophy,
+  Award,
+  Calendar,
+  MessageSquare,
+  User,
+  LogOut,
+  GraduationCap,
+  Sparkles,
+  Zap,
+  Flame,
+  Music,
+  Star
+} from "lucide-react";
 
 const NAV_ITEMS = [
-  { href: "/dashboard",               icon: "🏠", label: "Dashboard" },
-  { href: "/professors",              icon: "👩‍🏫", label: "Professors" },
-  { href: "/campus/courses",          icon: "📚", label: "Courses" },
-  { href: "/campus/leaderboard",      icon: "🏅", label: "Leaderboard" },
-  { href: "/campus/achievements",     icon: "🏆", label: "Achievements" },
-  { href: "/campus/events",           icon: "📅", label: "Events" },
-  { href: "/community",               icon: "💬", label: "Community" },
-  { href: "/profile",                 icon: "👤", label: "My Profile" },
+  { href: "/dashboard",               icon: Home, label: "Dashboard" },
+  { href: "/professors",              icon: Users2, label: "Professors" },
+  { href: "/campus/courses",          icon: BookOpen, label: "Courses" },
+  { href: "/campus/leaderboard",      icon: Trophy, label: "Leaderboard" },
+  { href: "/campus/achievements",     icon: Award, label: "Achievements" },
+  { href: "/campus/events",           icon: Calendar, label: "Events" },
+  { href: "/community",               icon: MessageSquare, label: "Community" },
+  { href: "/profile",                 icon: User, label: "My Profile" },
 ];
+
+function getMemberIcon(slug: string) {
+  switch (slug) {
+    case "angela": return Sparkles;
+    case "charice": return Zap;
+    case "alexa": return Flame;
+    case "sophia": return Music;
+    case "charlotte": return Star;
+    default: return Star;
+  }
+}
 
 export default function Sidebar() {
   const pathname = usePathname();
@@ -39,7 +67,7 @@ export default function Sidebar() {
       {/* Logo */}
       <Link href="/dashboard" style={{ textDecoration: "none", marginBottom: 28, display: "block", paddingLeft: 6 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <span style={{ fontSize: 22 }}>🎓</span>
+          <GraduationCap size={20} style={{ color: "#FF6B9D" }} />
           <span
             style={{
               fontWeight: 800,
@@ -63,6 +91,7 @@ export default function Sidebar() {
         </p>
         {NAV_ITEMS.map((item) => {
           const active = pathname === item.href || (item.href !== "/dashboard" && pathname.startsWith(item.href));
+          const Icon = item.icon;
           return (
             <Link
               key={item.href}
@@ -81,7 +110,7 @@ export default function Sidebar() {
                 transition: "all 0.2s",
               }}
             >
-              <span style={{ fontSize: 16 }}>{item.icon}</span>
+              <Icon size={16} style={{ opacity: active ? 1 : 0.7 }} />
               {item.label}
             </Link>
           );
@@ -93,6 +122,7 @@ export default function Sidebar() {
         </p>
         {KAIA_MEMBERS.map((m) => {
           const active = pathname === `/professors/${m.slug}`;
+          const MemberIcon = getMemberIcon(m.slug);
           return (
             <Link
               key={m.slug}
@@ -110,7 +140,7 @@ export default function Sidebar() {
                 transition: "all 0.2s",
               }}
             >
-              <span style={{ fontSize: 14 }}>{m.emoji}</span>
+              <MemberIcon size={14} style={{ color: active ? m.color : "#4b5563" }} />
               {m.name}
             </Link>
           );
@@ -138,7 +168,7 @@ export default function Sidebar() {
             transition: "all 0.2s",
           }}
         >
-          <span>🚪</span> Sign Out
+          <LogOut size={14} /> Sign Out
         </button>
       </div>
     </aside>
