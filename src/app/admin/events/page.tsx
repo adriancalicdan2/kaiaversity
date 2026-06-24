@@ -5,14 +5,15 @@ import { desc } from "drizzle-orm";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { createEvent, toggleEvent, deleteEvent } from "@/lib/actions/admin";
+import { Trophy, Plus, Trash2, Video, Zap, Mic, Cake } from "lucide-react";
 
 export const metadata: Metadata = { title: "Events — Admin" };
 
-const EVENT_TYPE_COLORS: Record<string, { bg: string; text: string; icon: string }> = {
-  LIVE:      { bg: "rgba(239,68,68,0.12)",   text: "#ef4444",  icon: "🔴" },
-  CHALLENGE: { bg: "rgba(139,92,246,0.12)",  text: "#a78bfa",  icon: "⚡" },
-  FANMEET:   { bg: "rgba(236,72,153,0.12)",  text: "#ec4899",  icon: "🎤" },
-  BIRTHDAY:  { bg: "rgba(245,158,11,0.12)",  text: "#f59e0b",  icon: "🎂" },
+const EVENT_TYPE_COLORS: Record<string, { bg: string; text: string; icon: React.ComponentType<any> }> = {
+  LIVE:      { bg: "rgba(239,68,68,0.12)",   text: "#ef4444",  icon: Video },
+  CHALLENGE: { bg: "rgba(139,92,246,0.12)",  text: "#a78bfa",  icon: Zap },
+  FANMEET:   { bg: "rgba(236,72,153,0.12)",  text: "#ec4899",  icon: Mic },
+  BIRTHDAY:  { bg: "rgba(245,158,11,0.12)",  text: "#f59e0b",  icon: Cake },
 };
 
 export default async function AdminEventsPage() {
@@ -35,8 +36,9 @@ export default async function AdminEventsPage() {
   return (
     <div style={{ padding: "32px 36px", maxWidth: 1100, margin: "0 auto" }}>
       <div style={{ marginBottom: 28 }}>
-        <h1 style={{ fontSize: 26, fontWeight: 900, color: "white", marginBottom: 4 }}>
-          🏆 Events Management
+        <h1 style={{ fontSize: 26, fontWeight: 900, color: "white", marginBottom: 4, display: "flex", alignItems: "center", gap: 8 }}>
+          <Trophy size={26} style={{ color: "#f59e0b" }} />
+          <span>Events Management</span>
         </h1>
         <p style={{ color: "#64748b", fontSize: 13 }}>
           {allEvents.filter((e) => e.isActive).length} active · {allEvents.length} total
@@ -52,8 +54,9 @@ export default async function AdminEventsPage() {
           borderRadius: 16, padding: "20px 24px", marginBottom: 28,
         }}
       >
-        <div style={{ fontSize: 14, fontWeight: 800, color: "white", marginBottom: 14 }}>
-          ➕ Create New Event
+        <div style={{ fontSize: 14, fontWeight: 800, color: "white", marginBottom: 14, display: "flex", alignItems: "center", gap: 6 }}>
+          <Plus size={16} />
+          <span>Create New Event</span>
         </div>
         <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1fr", gap: 10, marginBottom: 10 }}>
           <input name="title" placeholder="Event title" required style={inputStyle} />
@@ -102,7 +105,7 @@ export default async function AdminEventsPage() {
                 background: tc.bg, display: "flex", alignItems: "center", justifyContent: "center",
                 fontSize: 18, flexShrink: 0,
               }}>
-                {tc.icon}
+                <tc.icon size={18} style={{ color: tc.text }} />
               </div>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ fontWeight: 800, color: "white", fontSize: 14 }}>{event.title}</div>
@@ -120,7 +123,9 @@ export default async function AdminEventsPage() {
                   </button>
                 </form>
                 <form action={async () => { "use server"; await deleteEvent(event.id); }}>
-                  <button type="submit" style={btn("#ef4444")}>🗑</button>
+                  <button type="submit" style={{ ...btn("#ef4444"), display: "flex", alignItems: "center", justifyContent: "center", padding: "6px 10px" }}>
+                    <Trash2 size={14} />
+                  </button>
                 </form>
               </div>
             </div>

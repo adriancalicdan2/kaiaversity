@@ -3,6 +3,8 @@
 import React, { useOptimistic, useTransition } from "react";
 import { completeQuest } from "@/lib/actions/quests";
 import Link from "next/link";
+import { Share2, BookOpen, Heart, MessageSquare, MapPin, Zap, Check } from "lucide-react";
+import { EmojiIcon } from "@/components/shared/EmojiIcon";
 
 interface Quest {
   id: string;
@@ -84,7 +86,7 @@ export default function DailyQuests({ quests, initialCompletedQuestIds }: DailyQ
         <button
           onClick={() => handleShare(quest.id, quest.points)}
           disabled={isPending}
-          style={buttonStyle}
+          style={{ ...buttonStyle, display: "inline-flex", alignItems: "center", gap: 4 }}
           onMouseEnter={(e) => {
             e.currentTarget.style.background = "rgba(139, 92, 246, 0.18)";
           }}
@@ -92,7 +94,8 @@ export default function DailyQuests({ quests, initialCompletedQuestIds }: DailyQ
             e.currentTarget.style.background = "rgba(139, 92, 246, 0.08)";
           }}
         >
-          Share 📤
+          <span>Share</span>
+          <Share2 size={12} />
         </button>
       );
     }
@@ -101,7 +104,7 @@ export default function DailyQuests({ quests, initialCompletedQuestIds }: DailyQ
       return (
         <Link
           href="/campus/courses"
-          style={buttonStyle}
+          style={{ ...buttonStyle, display: "inline-flex", alignItems: "center", gap: 4 }}
           onMouseEnter={(e) => {
             e.currentTarget.style.background = "rgba(139, 92, 246, 0.18)";
           }}
@@ -109,7 +112,8 @@ export default function DailyQuests({ quests, initialCompletedQuestIds }: DailyQ
             e.currentTarget.style.background = "rgba(139, 92, 246, 0.08)";
           }}
         >
-          Go Read 📖
+          <span>Go Read</span>
+          <BookOpen size={12} />
         </Link>
       );
     }
@@ -118,7 +122,7 @@ export default function DailyQuests({ quests, initialCompletedQuestIds }: DailyQ
       return (
         <Link
           href="/dashboard"
-          style={buttonStyle}
+          style={{ ...buttonStyle, display: "inline-flex", alignItems: "center", gap: 4 }}
           onMouseEnter={(e) => {
             e.currentTarget.style.background = "rgba(139, 92, 246, 0.18)";
           }}
@@ -126,7 +130,8 @@ export default function DailyQuests({ quests, initialCompletedQuestIds }: DailyQ
             e.currentTarget.style.background = "rgba(139, 92, 246, 0.08)";
           }}
         >
-          Go Like ❤️
+          <span>Go Like</span>
+          <Heart size={12} />
         </Link>
       );
     }
@@ -135,7 +140,7 @@ export default function DailyQuests({ quests, initialCompletedQuestIds }: DailyQ
       return (
         <Link
           href="/community"
-          style={buttonStyle}
+          style={{ ...buttonStyle, display: "inline-flex", alignItems: "center", gap: 4 }}
           onMouseEnter={(e) => {
             e.currentTarget.style.background = "rgba(139, 92, 246, 0.18)";
           }}
@@ -143,7 +148,8 @@ export default function DailyQuests({ quests, initialCompletedQuestIds }: DailyQ
             e.currentTarget.style.background = "rgba(139, 92, 246, 0.08)";
           }}
         >
-          Go Reply 💬
+          <span>Go Reply</span>
+          <MessageSquare size={12} />
         </Link>
       );
     }
@@ -152,7 +158,7 @@ export default function DailyQuests({ quests, initialCompletedQuestIds }: DailyQ
       <button
         onClick={() => handleClaim(quest.id, quest.points)}
         disabled={isPending}
-        style={buttonStyle}
+        style={{ ...buttonStyle, display: "inline-flex", alignItems: "center", gap: 4 }}
         onMouseEnter={(e) => {
           e.currentTarget.style.background = "rgba(139, 92, 246, 0.18)";
         }}
@@ -160,7 +166,8 @@ export default function DailyQuests({ quests, initialCompletedQuestIds }: DailyQ
           e.currentTarget.style.background = "rgba(139, 92, 246, 0.08)";
         }}
       >
-        Check In 🏫
+        <span>Check In</span>
+        <MapPin size={12} />
       </button>
     );
   }
@@ -186,7 +193,8 @@ export default function DailyQuests({ quests, initialCompletedQuestIds }: DailyQ
           gap: 6,
         }}
       >
-        ⚡ Daily Quests
+        <Zap size={16} style={{ color: "#ec4899" }} />
+        <span>Daily Quests</span>
         <span style={{ fontSize: 11, color: "#64748b", fontWeight: 400, marginLeft: "auto" }}>
           Resets midnight PH
         </span>
@@ -209,7 +217,9 @@ export default function DailyQuests({ quests, initialCompletedQuestIds }: DailyQ
                 transition: "all 0.3s ease",
               }}
             >
-              <span style={{ fontSize: 20 }}>{quest.icon || "📝"}</span>
+              <span style={{ display: "inline-flex", width: 32, height: 32, borderRadius: 8, background: "rgba(255,255,255,0.04)", alignItems: "center", justifyContent: "center" }}>
+                <EmojiIcon emoji={quest.icon || "📝"} size={18} style={{ color: "#a78bfa" }} />
+              </span>
               <div style={{ flex: 1 }}>
                 <p
                   style={{
@@ -237,9 +247,12 @@ export default function DailyQuests({ quests, initialCompletedQuestIds }: DailyQ
                     padding: "4px 10px",
                     borderRadius: 99,
                     whiteSpace: "nowrap",
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: 4,
                   }}
                 >
-                  ✓ Completed
+                  <Check size={11} /> Completed
                 </span>
               ) : (
                 renderQuestButton(quest)

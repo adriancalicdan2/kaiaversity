@@ -16,6 +16,11 @@ import { count, desc, sum } from "drizzle-orm";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { 
+  Settings, Users, PenTool, MessageSquare, GraduationCap, 
+  ClipboardList, Trophy, Coins, Zap, UserPlus, Star, ChevronRight,
+  Target
+} from "lucide-react";
 
 export const metadata: Metadata = { title: "Admin Dashboard — KAIAVERSITY" };
 
@@ -54,29 +59,30 @@ export default async function AdminDashboardPage() {
   });
 
   const stats = [
-    { label: "Enrolled ZAIAs",   value: userCount?.count ?? 0,        icon: "👥", color: "#8B5CF6", href: "/admin/users" },
-    { label: "Total Posts",       value: postCount?.count ?? 0,        icon: "✍️",  color: "#06b6d4", href: "/admin/content" },
-    { label: "Comments",          value: commentCount?.count ?? 0,     icon: "💬", color: "#ec4899", href: "/admin/content" },
-    { label: "Enrollments",       value: enrollCount?.count ?? 0,      icon: "🎓", color: "#10b981", href: "/admin/courses" },
-    { label: "Pending Reviews",   value: submissionCount?.count ?? 0,  icon: "📋", color: "#f59e0b", href: "/admin/submissions" },
-    { label: "Active Events",     value: eventCount?.count ?? 0,       icon: "🏆", color: "#f43f5e", href: "/admin/events" },
+    { label: "Enrolled ZAIAs",   value: userCount?.count ?? 0,        icon: Users, color: "#8B5CF6", href: "/admin/users" },
+    { label: "Total Posts",       value: postCount?.count ?? 0,        icon: PenTool,  color: "#06b6d4", href: "/admin/content" },
+    { label: "Comments",          value: commentCount?.count ?? 0,     icon: MessageSquare, color: "#ec4899", href: "/admin/content" },
+    { label: "Enrollments",       value: enrollCount?.count ?? 0,      icon: GraduationCap, color: "#10b981", href: "/admin/courses" },
+    { label: "Pending Reviews",   value: submissionCount?.count ?? 0,  icon: ClipboardList, color: "#f59e0b", href: "/admin/submissions" },
+    { label: "Active Events",     value: eventCount?.count ?? 0,       icon: Trophy, color: "#f43f5e", href: "/admin/events" },
   ];
 
   const quickActions = [
-    { href: "/admin/users",       icon: "👥", label: "Manage Users",       color: "#8B5CF6" },
-    { href: "/admin/content",     icon: "✍️",  label: "Manage Content",     color: "#06b6d4" },
-    { href: "/admin/submissions", icon: "📋", label: "Review Submissions",  color: "#f59e0b" },
-    { href: "/admin/courses",     icon: "🎓", label: "Manage Courses",      color: "#10b981" },
-    { href: "/admin/events",      icon: "🏆", label: "Manage Events",       color: "#f43f5e" },
-    { href: "/admin/quests",      icon: "🎯", label: "Manage Quests",       color: "#ec4899" },
+    { href: "/admin/users",       icon: Users, label: "Manage Users",       color: "#8B5CF6" },
+    { href: "/admin/content",     icon: PenTool,  label: "Manage Content",     color: "#06b6d4" },
+    { href: "/admin/submissions", icon: ClipboardList, label: "Review Submissions",  color: "#f59e0b" },
+    { href: "/admin/courses",     icon: GraduationCap, label: "Manage Courses",      color: "#10b981" },
+    { href: "/admin/events",      icon: Trophy, label: "Manage Events",       color: "#f43f5e" },
+    { href: "/admin/quests",      icon: Target, label: "Manage Quests",       color: "#ec4899" },
   ];
 
   return (
     <div style={{ padding: "32px 36px", maxWidth: 1100, margin: "0 auto" }}>
       {/* Header */}
       <div style={{ marginBottom: 32 }}>
-        <h1 style={{ fontSize: 28, fontWeight: 900, color: "white", marginBottom: 6 }}>
-          ⚙️ Control Center
+        <h1 style={{ fontSize: 28, fontWeight: 900, color: "white", marginBottom: 6, display: "flex", alignItems: "center", gap: 10 }}>
+          <Settings size={28} style={{ color: "#8B5CF6" }} />
+          <span>Control Center</span>
         </h1>
         <p style={{ color: "#64748b", fontSize: 14 }}>
           Welcome back, <span style={{ color: "#f59e0b" }}>{session.user.name}</span>.
@@ -121,11 +127,10 @@ export default async function AdminDashboardPage() {
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  fontSize: 22,
                   flexShrink: 0,
                 }}
               >
-                {s.icon}
+                <s.icon size={22} style={{ color: s.color }} />
               </div>
               <div>
                 <div style={{ fontSize: 28, fontWeight: 900, color: s.color, lineHeight: 1 }}>
@@ -157,15 +162,18 @@ export default async function AdminDashboardPage() {
             {totalPoints.toLocaleString()} <span style={{ fontSize: 16, fontWeight: 600 }}>PTS</span>
           </div>
         </div>
-        <div style={{ fontSize: 40 }}>💰</div>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <Coins size={40} style={{ color: "#f59e0b" }} />
+        </div>
       </div>
 
       {/* Two columns: Quick Actions + Recent Users */}
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24, marginBottom: 24 }}>
         {/* Quick Actions */}
         <div>
-          <h2 style={{ fontSize: 16, fontWeight: 800, color: "white", marginBottom: 14 }}>
-            ⚡ Quick Actions
+          <h2 style={{ fontSize: 16, fontWeight: 800, color: "white", marginBottom: 14, display: "flex", alignItems: "center", gap: 6 }}>
+            <Zap size={18} style={{ color: "#ec4899" }} />
+            <span>Quick Actions</span>
           </h2>
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
             {quickActions.map((a) => (
@@ -196,13 +204,12 @@ export default async function AdminDashboardPage() {
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    fontSize: 16,
                   }}
                 >
-                  {a.icon}
+                  <a.icon size={16} style={{ color: a.color }} />
                 </span>
                 {a.label}
-                <span style={{ marginLeft: "auto", color: "#334155" }}>→</span>
+                <ChevronRight size={16} style={{ marginLeft: "auto", color: "#334155" }} />
               </Link>
             ))}
           </div>
@@ -210,8 +217,9 @@ export default async function AdminDashboardPage() {
 
         {/* Recent Users */}
         <div>
-          <h2 style={{ fontSize: 16, fontWeight: 800, color: "white", marginBottom: 14 }}>
-            🆕 Recently Joined
+          <h2 style={{ fontSize: 16, fontWeight: 800, color: "white", marginBottom: 14, display: "flex", alignItems: "center", gap: 6 }}>
+            <UserPlus size={18} style={{ color: "#10b981" }} />
+            <span>Recently Joined</span>
           </h2>
           <div
             style={{
@@ -245,7 +253,11 @@ export default async function AdminDashboardPage() {
                     flexShrink: 0,
                   }}
                 >
-                  {u.role === "ADMIN" ? "⚙️" : u.role === "PROFESSOR" ? "🎓" : "🌟"}
+                  {(() => {
+                    if (u.role === "ADMIN") return <Settings size={16} style={{ color: "#f59e0b" }} />;
+                    if (u.role === "PROFESSOR") return <GraduationCap size={16} style={{ color: "#8b5cf6" }} />;
+                    return <Star size={16} style={{ color: "#10b981" }} />;
+                  })()}
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ fontSize: 13, fontWeight: 700, color: "white", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
@@ -272,8 +284,9 @@ export default async function AdminDashboardPage() {
           }}
         >
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
-            <h3 style={{ fontSize: 14, fontWeight: 800, color: "#f59e0b" }}>
-              📋 {pendingSubmissions.length} Submission{pendingSubmissions.length > 1 ? "s" : ""} Awaiting Review
+            <h3 style={{ fontSize: 14, fontWeight: 800, color: "#f59e0b", display: "flex", alignItems: "center", gap: 6 }}>
+              <ClipboardList size={16} />
+              <span>{pendingSubmissions.length} Submission{pendingSubmissions.length > 1 ? "s" : ""} Awaiting Review</span>
             </h3>
             <Link
               href="/admin/submissions"

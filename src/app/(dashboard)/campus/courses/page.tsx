@@ -8,6 +8,18 @@ import Link from "next/link";
 import { enrollInCourse } from "@/lib/actions/courses";
 import { isLevelUnlockedForUser } from "@/lib/actions/levels";
 import { redirect } from "next/navigation";
+import { 
+  BookOpen, 
+  Lock, 
+  AlertTriangle, 
+  Clock, 
+  Sparkles, 
+  Zap, 
+  Flame, 
+  Music, 
+  Star,
+  UserCheck
+} from "lucide-react";
 
 export const metadata: Metadata = { title: "Courses - Campus" };
 
@@ -16,6 +28,16 @@ const DIFFICULTY_COLORS: Record<string, string> = {
   INTERMEDIATE: "#f59e0b", // yellow
   ADVANCED: "#ef4444",     // red
 };
+
+function getMemberIcon(name: string) {
+  const n = name.toLowerCase();
+  if (n.includes("angela")) return Sparkles;
+  if (n.includes("charice")) return Zap;
+  if (n.includes("alexa")) return Flame;
+  if (n.includes("sophia")) return Music;
+  if (n.includes("charlotte")) return Star;
+  return Star;
+}
 
 export default async function CoursesPage() {
   const session = await auth();
@@ -44,9 +66,12 @@ export default async function CoursesPage() {
   return (
     <div style={{ padding: "28px 32px", maxWidth: 1000, margin: "0 auto" }}>
       <div style={{ marginBottom: 32 }}>
-        <h1 style={{ fontSize: 28, fontWeight: 800, color: "white", marginBottom: 6 }}>
-          📚 Campus Lecture Hall
-        </h1>
+        <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6 }}>
+          <BookOpen size={28} style={{ color: "#8B5CF6" }} />
+          <h1 style={{ fontSize: 28, fontWeight: 800, color: "white", margin: 0 }}>
+            Campus Lecture Hall
+          </h1>
+        </div>
         <p style={{ color: "#64748b", fontSize: 14 }}>
           Enroll in courses taught by your favorite KAIA professors, finish all modules, and pass the quizzes to earn points and unique badges!
         </p>
@@ -61,9 +86,17 @@ export default async function CoursesPage() {
             padding: 64,
             textAlign: "center",
             color: "#64748b",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: 12,
           }}
         >
-          No courses are open for registration at the moment. Please check back later! ✨
+          <BookOpen size={48} style={{ color: "#475569" }} />
+          <div style={{ display: "flex", alignItems: "center", gap: 6, justifyContent: "center" }}>
+            <span>No courses are open for registration at the moment. Please check back later!</span>
+            <Sparkles size={14} />
+          </div>
         </div>
       ) : (
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(310px, 1fr))", gap: 24 }}>
@@ -135,10 +168,14 @@ export default async function CoursesPage() {
                       fontWeight: 800,
                       padding: "4px 12px",
                       borderBottomLeftRadius: 12,
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 4,
                       letterSpacing: "0.05em",
                     }}
                   >
-                    🔒 LOCKED
+                    <Lock size={10} />
+                    <span>LOCKED</span>
                   </div>
                 )}
 
@@ -173,33 +210,54 @@ export default async function CoursesPage() {
                   </p>
 
                   {isLocked && levelUnlock.reason && (
-                    <p style={{ color: "#ef4444", fontSize: 11, fontWeight: 600, background: "rgba(239, 68, 68, 0.05)", padding: "8px 12px", borderRadius: 8, marginBottom: 16 }}>
-                      ⚠️ {levelUnlock.reason}
-                    </p>
+                    <div style={{ display: "flex", alignItems: "flex-start", gap: 6, color: "#ef4444", fontSize: 11, fontWeight: 600, background: "rgba(239, 68, 68, 0.05)", padding: "8px 12px", borderRadius: 8, marginBottom: 16 }}>
+                      <AlertTriangle size={13} style={{ flexShrink: 0, marginTop: 1 }} />
+                      <span>{levelUnlock.reason}</span>
+                    </div>
                   )}
                 </div>
 
                 <div>
                   <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 20 }}>
-                    <span
-                      style={{
-                        width: 24,
-                        height: 24,
-                        borderRadius: "50%",
-                        background: professor ? `${professor.color}20` : "rgba(255,255,255,0.05)",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        fontSize: 12,
-                      }}
-                    >
-                      {professor?.emoji || "👩‍🏫"}
-                    </span>
+                    {professor ? (() => {
+                      const MemberIcon = getMemberIcon(professor.name);
+                      return (
+                        <span
+                          style={{
+                            width: 24,
+                            height: 24,
+                            borderRadius: "50%",
+                            background: `${professor.color}20`,
+                            color: professor.color || "#8B5CF6",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                          }}
+                        >
+                          <MemberIcon size={12} />
+                        </span>
+                      );
+                    })() : (
+                      <span
+                        style={{
+                          width: 24,
+                          height: 24,
+                          borderRadius: "50%",
+                          background: "rgba(255,255,255,0.05)",
+                          color: "#94a3b8",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                        }}
+                      >
+                        <UserCheck size={12} />
+                      </span>
+                    )}
                     <span style={{ fontSize: 12, color: "#94a3b8", fontWeight: 600 }}>
                       Prof. {professor?.name || "KAIA"}
                     </span>
-                    <span style={{ fontSize: 11, color: "#475569", marginLeft: "auto" }}>
-                      ⏱️ {course.estimatedMinutes} mins
+                    <span style={{ display: "inline-flex", alignItems: "center", gap: 4, fontSize: 11, color: "#475569", marginLeft: "auto" }}>
+                      <Clock size={11} /> {course.estimatedMinutes} mins
                     </span>
                   </div>
 

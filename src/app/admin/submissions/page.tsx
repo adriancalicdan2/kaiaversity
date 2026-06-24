@@ -5,6 +5,7 @@ import { desc } from "drizzle-orm";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { reviewSubmission } from "@/lib/actions/admin";
+import { ClipboardCheck, Hourglass, Check, X, CheckSquare, Inbox } from "lucide-react";
 
 export const metadata: Metadata = { title: "Submission Review — Admin" };
 
@@ -46,8 +47,9 @@ export default async function AdminSubmissionsPage() {
   return (
     <div style={{ padding: "32px 36px", maxWidth: 1100, margin: "0 auto" }}>
       <div style={{ marginBottom: 28 }}>
-        <h1 style={{ fontSize: 26, fontWeight: 900, color: "white", marginBottom: 4 }}>
-          📋 Submission Review
+        <h1 style={{ fontSize: 26, fontWeight: 900, color: "white", marginBottom: 4, display: "flex", alignItems: "center", gap: 8 }}>
+          <ClipboardCheck size={26} style={{ color: "#8b5cf6" }} />
+          <span>Submission Review</span>
         </h1>
         <p style={{ color: "#64748b", fontSize: 13 }}>
           <span style={{ color: "#f59e0b" }}>{pending.length} pending</span> · {reviewed.length} reviewed
@@ -56,8 +58,9 @@ export default async function AdminSubmissionsPage() {
 
       {pending.length > 0 && (
         <>
-          <h2 style={{ fontSize: 14, fontWeight: 800, color: "#f59e0b", letterSpacing: "0.08em", marginBottom: 12 }}>
-            ⏳ PENDING REVIEW
+          <h2 style={{ fontSize: 14, fontWeight: 800, color: "#f59e0b", letterSpacing: "0.08em", marginBottom: 12, display: "flex", alignItems: "center", gap: 6 }}>
+            <Hourglass size={14} />
+            <span>PENDING REVIEW</span>
           </h2>
           <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 36 }}>
             {pending.map((sub) => {
@@ -107,8 +110,10 @@ export default async function AdminSubmissionsPage() {
                         padding: "9px 20px", borderRadius: 10, fontWeight: 700, fontSize: 13,
                         background: "rgba(16,185,129,0.15)", border: "1px solid rgba(16,185,129,0.4)",
                         color: "#10b981", cursor: "pointer",
+                        display: "inline-flex", alignItems: "center", gap: 6
                       }}>
-                        ✅ Approve
+                        <Check size={14} />
+                        <span>Approve</span>
                       </button>
                     </form>
                     <form action={async () => { "use server"; await reviewSubmission(sub.id, "REJECTED", "Submission needs revision."); }}>
@@ -116,8 +121,10 @@ export default async function AdminSubmissionsPage() {
                         padding: "9px 20px", borderRadius: 10, fontWeight: 700, fontSize: 13,
                         background: "rgba(239,68,68,0.12)", border: "1px solid rgba(239,68,68,0.3)",
                         color: "#ef4444", cursor: "pointer",
+                        display: "inline-flex", alignItems: "center", gap: 6
                       }}>
-                        ❌ Reject
+                        <X size={14} />
+                        <span>Reject</span>
                       </button>
                     </form>
                   </div>
@@ -130,8 +137,9 @@ export default async function AdminSubmissionsPage() {
 
       {reviewed.length > 0 && (
         <>
-          <h2 style={{ fontSize: 14, fontWeight: 800, color: "#64748b", letterSpacing: "0.08em", marginBottom: 12 }}>
-            ✅ REVIEWED
+          <h2 style={{ fontSize: 14, fontWeight: 800, color: "#64748b", letterSpacing: "0.08em", marginBottom: 12, display: "flex", alignItems: "center", gap: 6 }}>
+            <CheckSquare size={14} />
+            <span>REVIEWED</span>
           </h2>
           <div style={{
             background: "rgba(255,255,255,0.02)",
@@ -173,8 +181,9 @@ export default async function AdminSubmissionsPage() {
       )}
 
       {allSubmissions.length === 0 && (
-        <div style={{ textAlign: "center", padding: 60, color: "#475569" }}>
-          No submissions yet 🎉
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: 60, color: "#475569" }}>
+          <Inbox size={48} style={{ color: "#334155", marginBottom: 12 }} />
+          <div>No submissions yet</div>
         </div>
       )}
     </div>

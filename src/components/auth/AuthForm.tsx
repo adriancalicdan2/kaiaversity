@@ -4,6 +4,7 @@ import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { signUp } from "@/lib/actions/auth";
+import { AlertTriangle, CheckCircle2 } from "lucide-react";
 
 export default function AuthForm() {
   const router = useRouter();
@@ -189,7 +190,10 @@ export default function AuthForm() {
             textAlign: "center",
           }}
         >
-          ⚠️ {error}
+          <div style={{ display: "inline-flex", alignItems: "center", gap: 6, justifyContent: "center" }}>
+            <AlertTriangle size={16} />
+            <span>{error}</span>
+          </div>
         </div>
       )}
 
@@ -206,7 +210,10 @@ export default function AuthForm() {
             textAlign: "center",
           }}
         >
-          ✅ {success}
+          <div style={{ display: "inline-flex", alignItems: "center", gap: 6, justifyContent: "center" }}>
+            <CheckCircle2 size={16} />
+            <span>{success}</span>
+          </div>
         </div>
       )}
 

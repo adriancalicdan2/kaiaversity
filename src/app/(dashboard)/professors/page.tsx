@@ -1,14 +1,29 @@
 import { KAIA_MEMBERS } from "@/lib/constants/members";
 import Link from "next/link";
 import type { Metadata } from "next";
+import { 
+  GraduationCap, Calendar, MapPin, Brain, 
+  Sparkles, Zap, Flame, Music, Star 
+} from "lucide-react";
+
+function getMemberIcon(name: string) {
+  const n = name.toLowerCase();
+  if (n.includes("angela")) return Sparkles;
+  if (n.includes("charice")) return Zap;
+  if (n.includes("alexa")) return Flame;
+  if (n.includes("sophia")) return Music;
+  if (n.includes("charlotte")) return Star;
+  return Star;
+}
 
 export const metadata: Metadata = { title: "Professors" };
 
 export default function ProfessorsPage() {
   return (
     <div style={{ padding: "28px 32px", maxWidth: 1000, margin: "0 auto" }}>
-      <h1 style={{ fontSize: 28, fontWeight: 800, color: "white", marginBottom: 6 }}>
-        👩‍🏫 Your Professors
+      <h1 style={{ fontSize: 28, fontWeight: 800, color: "white", marginBottom: 6, display: "flex", alignItems: "center", gap: 8 }}>
+        <GraduationCap size={28} style={{ color: "#a78bfa" }} />
+        <span>Your Professors</span>
       </h1>
       <p style={{ color: "#64748b", fontSize: 14, marginBottom: 32 }}>
         5 talented members, each with their own personality and content to share.
@@ -50,7 +65,10 @@ export default function ProfessorsPage() {
                   fontSize: 36, marginBottom: 16,
                 }}
               >
-                {member.emoji}
+                {(() => {
+                  const MemberIcon = getMemberIcon(member.name);
+                  return <MemberIcon size={36} style={{ color: member.color }} />;
+                })()}
               </div>
 
               {/* Name + positions */}
@@ -89,9 +107,20 @@ export default function ProfessorsPage() {
                   borderTop: "1px solid rgba(255,255,255,0.06)", paddingTop: 12,
                 }}
               >
-                <span>🎂 {member.birthday.split(",")[0]}</span>
-                <span>📍 {member.hometown.split(",")[0]}</span>
-                {member.mbti && <span>🧠 {member.mbti}</span>}
+                <span style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
+                  <Calendar size={12} />
+                  <span>{member.birthday.split(",")[0]}</span>
+                </span>
+                <span style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
+                  <MapPin size={12} />
+                  <span>{member.hometown.split(",")[0]}</span>
+                </span>
+                {member.mbti && (
+                  <span style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
+                    <Brain size={12} />
+                    <span>{member.mbti}</span>
+                  </span>
+                )}
               </div>
 
               <div

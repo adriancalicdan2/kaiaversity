@@ -10,6 +10,28 @@ import { formatTimeAgo } from "@/lib/utils";
 import type { Metadata } from "next";
 import Link from "next/link";
 import PostCard from "@/components/community/PostCard";
+import { 
+  BookOpen, 
+  FileText, 
+  Lock, 
+  Award, 
+  Sparkles, 
+  Zap, 
+  Flame, 
+  Music, 
+  Star 
+} from "lucide-react";
+import { EmojiIcon } from "@/components/shared/EmojiIcon";
+
+function getMemberIcon(name: string) {
+  const n = name.toLowerCase();
+  if (n.includes("angela")) return Sparkles;
+  if (n.includes("charice")) return Zap;
+  if (n.includes("alexa")) return Flame;
+  if (n.includes("sophia")) return Music;
+  if (n.includes("charlotte")) return Star;
+  return Star;
+}
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -30,10 +52,10 @@ export function generateStaticParams() {
 }
 
 const POST_TYPE_STYLES: Record<string, { bg: string; color: string; label: string }> = {
-  LECTURE:      { bg: "rgba(6,182,212,0.15)",  color: "#06b6d4", label: "📖 Lecture" },
-  DIARY:        { bg: "rgba(236,72,153,0.15)", color: "#ec4899", label: "📔 Diary" },
-  ANNOUNCEMENT: { bg: "rgba(245,158,11,0.15)", color: "#f59e0b", label: "📢 Announcement" },
-  ASSIGNMENT:   { bg: "rgba(16,185,129,0.15)", color: "#10b981", label: "📝 Assignment" },
+  LECTURE:      { bg: "rgba(6,182,212,0.15)",  color: "#06b6d4", label: "Lecture" },
+  DIARY:        { bg: "rgba(236,72,153,0.15)", color: "#ec4899", label: "Diary" },
+  ANNOUNCEMENT: { bg: "rgba(245,158,11,0.15)", color: "#f59e0b", label: "Announcement" },
+  ASSIGNMENT:   { bg: "rgba(16,185,129,0.15)", color: "#10b981", label: "Assignment" },
 };
 
 export default async function MemberProfilePage({ params }: Props) {
@@ -105,12 +127,14 @@ export default async function MemberProfilePage({ params }: Props) {
               width: 96, height: 96, borderRadius: "50%", flexShrink: 0,
               background: `${member.color}20`,
               border: `3px solid ${member.color}60`,
-              display: "flex", alignItems: "center", justifyContent: "center",
-              fontSize: 52,
-            }}
-          >
-            {member.emoji}
-          </div>
+            display: "flex", alignItems: "center", justifyContent: "center",
+          }}
+        >
+          {(() => {
+            const MemberIcon = getMemberIcon(member.name);
+            return <MemberIcon size={48} style={{ color: member.color }} />;
+          })()}
+        </div>
 
           {/* Info */}
           <div style={{ flex: 1 }}>
@@ -177,8 +201,9 @@ export default async function MemberProfilePage({ params }: Props) {
         <div>
           {/* Courses Section */}
           <div style={{ marginBottom: 36 }}>
-            <h2 style={{ color: "white", fontWeight: 800, fontSize: 18, marginBottom: 16 }}>
-              📚 Courses taught by Prof. {member.name}
+            <h2 style={{ display: "flex", alignItems: "center", gap: 8, color: "white", fontWeight: 800, fontSize: 18, marginBottom: 16 }}>
+              <BookOpen size={20} style={{ color: member.color || "#8B5CF6" }} />
+              <span>Courses taught by Prof. {member.name}</span>
             </h2>
             {memberCourses.length === 0 ? (
               <div style={{ color: "#64748b", fontSize: 13, background: "rgba(255,255,255,0.01)", border: "1px solid rgba(255,255,255,0.05)", padding: 24, borderRadius: 12, textAlign: "center" }}>
@@ -212,7 +237,9 @@ export default async function MemberProfilePage({ params }: Props) {
                       }}
                     >
                       <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                        <span style={{ fontSize: 24 }}>{course.coverEmoji}</span>
+                        <span style={{ display: "inline-flex", width: 40, height: 40, borderRadius: 10, background: "rgba(255,255,255,0.04)", alignItems: "center", justifyContent: "center" }}>
+                          <EmojiIcon emoji={course.coverEmoji || "📚"} size={22} style={{ color: member.color || "#8B5CF6" }} />
+                        </span>
                         <div>
                           <h4 style={{ color: "white", fontSize: 14, fontWeight: 700, margin: 0 }}>
                             {course.title}
@@ -225,12 +252,12 @@ export default async function MemberProfilePage({ params }: Props) {
 
                       <div>
                         {isLocked ? (
-                          <span style={{ color: "#ef4444", fontSize: 12, fontWeight: 600 }}>
-                            🔒 Locked Lvl {course.minLevel}
+                          <span style={{ display: "inline-flex", alignItems: "center", gap: 4, color: "#ef4444", fontSize: 12, fontWeight: 600 }}>
+                            <Lock size={12} /> Locked Lvl {course.minLevel}
                           </span>
                         ) : isCompleted ? (
-                          <span style={{ color: "#10b981", fontSize: 12, fontWeight: 700 }}>
-                            🏆 Completed ({enrollment.quizScore}%)
+                          <span style={{ display: "inline-flex", alignItems: "center", gap: 4, color: "#10b981", fontSize: 12, fontWeight: 700 }}>
+                            <Award size={12} /> Completed ({enrollment.quizScore}%)
                           </span>
                         ) : enrollment ? (
                           <div style={{ display: "flex", gap: 8 }}>
@@ -296,8 +323,9 @@ export default async function MemberProfilePage({ params }: Props) {
             )}
           </div>
 
-          <h2 style={{ color: "white", fontWeight: 700, fontSize: 18, marginBottom: 16 }}>
-            📝 Posts ({memberPosts.length})
+          <h2 style={{ display: "flex", alignItems: "center", gap: 8, color: "white", fontWeight: 700, fontSize: 18, marginBottom: 16 }}>
+            <FileText size={20} style={{ color: member.color || "#8B5CF6" }} />
+            <span>Posts ({memberPosts.length})</span>
           </h2>
           {memberPosts.length === 0 ? (
             <div
@@ -307,7 +335,7 @@ export default async function MemberProfilePage({ params }: Props) {
                 borderRadius: 16, padding: "48px", textAlign: "center", color: "#475569",
               }}
             >
-              {member.name} hasn&apos;t posted yet. Check back soon! {member.emoji}
+               {member.name} hasn&apos;t posted yet. Check back soon!
             </div>
           ) : (
             <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
@@ -340,9 +368,15 @@ export default async function MemberProfilePage({ params }: Props) {
               borderRadius: 16, padding: "20px", position: "sticky", top: 20,
             }}
           >
-            <h3 style={{ color: member.color, fontWeight: 700, fontSize: 15, marginBottom: 14 }}>
-              {member.emoji} Fun Facts
-            </h3>
+            {(() => {
+              const MemberIcon = getMemberIcon(member.name);
+              return (
+                <h3 style={{ display: "flex", alignItems: "center", gap: 6, color: member.color, fontWeight: 700, fontSize: 15, marginBottom: 14 }}>
+                  <MemberIcon size={16} />
+                  <span>Fun Facts</span>
+                </h3>
+              );
+            })()}
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
               {member.funFacts.map((fact, i) => (
                 <div

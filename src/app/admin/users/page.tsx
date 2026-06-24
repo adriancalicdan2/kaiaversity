@@ -4,6 +4,7 @@ import { users } from "@/lib/db/schema";
 import { desc } from "drizzle-orm";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
+import { Users, Trash2 } from "lucide-react";
 import {
   updateUserRole,
   adjustUserPoints,
@@ -33,8 +34,9 @@ export default async function AdminUsersPage() {
   return (
     <div style={{ padding: "32px 36px", maxWidth: 1100, margin: "0 auto" }}>
       <div style={{ marginBottom: 28 }}>
-        <h1 style={{ fontSize: 26, fontWeight: 900, color: "white", marginBottom: 4 }}>
-          👥 User Management
+        <h1 style={{ fontSize: 26, fontWeight: 900, color: "white", marginBottom: 4, display: "flex", alignItems: "center", gap: 8 }}>
+          <Users size={26} style={{ color: "#8b5cf6" }} />
+          <span>User Management</span>
         </h1>
         <p style={{ color: "#64748b", fontSize: 13 }}>
           {allUsers.length} total users · Manage roles, points, and access
@@ -127,7 +129,9 @@ export default async function AdminUsersPage() {
                         </form>
                         {/* Delete */}
                         <form action={async () => { "use server"; await deleteUser(user.id); }}>
-                          <button type="submit" style={btnStyle("#ef4444", true)}>🗑</button>
+                          <button type="submit" style={{ ...btnStyle("#ef4444", true), display: "flex", alignItems: "center", justifyContent: "center", padding: "4px 8px" }}>
+                            <Trash2 size={13} />
+                          </button>
                         </form>
                       </div>
                     ) : (

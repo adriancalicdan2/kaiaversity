@@ -5,6 +5,8 @@ import { eq, asc } from "drizzle-orm";
 import type { Metadata } from "next";
 import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
+import { BookOpen, ArrowLeft } from "lucide-react";
+import { EmojiIcon } from "@/components/shared/EmojiIcon";
 
 export const metadata: Metadata = { title: "Course Detail — Admin" };
 
@@ -38,9 +40,10 @@ export default async function AdminCourseDetailPage({
     <div style={{ padding: "32px 36px", maxWidth: 900, margin: "0 auto" }}>
       <Link
         href="/admin/courses"
-        style={{ fontSize: 13, color: "#64748b", textDecoration: "none", display: "inline-block", marginBottom: 20 }}
+        style={{ fontSize: 13, color: "#64748b", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 6, marginBottom: 20 }}
       >
-        ← Back to Courses
+        <ArrowLeft size={14} />
+        <span>Back to Courses</span>
       </Link>
 
       <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 28 }}>
@@ -49,7 +52,7 @@ export default async function AdminCourseDetailPage({
           background: "rgba(139,92,246,0.12)",
           display: "flex", alignItems: "center", justifyContent: "center", fontSize: 26,
         }}>
-          {course.coverEmoji ?? "📚"}
+          <EmojiIcon emoji={course.coverEmoji ?? "📚"} size={26} style={{ color: "#a78bfa" }} />
         </div>
         <div>
           <h1 style={{ fontSize: 22, fontWeight: 900, color: "white", marginBottom: 4 }}>{course.title}</h1>
@@ -78,8 +81,9 @@ export default async function AdminCourseDetailPage({
       </div>
 
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
-        <h2 style={{ fontSize: 16, fontWeight: 800, color: "white" }}>
-          📖 Modules ({modules.length})
+        <h2 style={{ fontSize: 16, fontWeight: 800, color: "white", display: "flex", alignItems: "center", gap: 6 }}>
+          <BookOpen size={16} style={{ color: "#a78bfa" }} />
+          <span>Modules ({modules.length})</span>
         </h2>
       </div>
 

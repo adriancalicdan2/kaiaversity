@@ -2,13 +2,35 @@ import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { users, userAchievements, pointTransactions } from "@/lib/db/schema";
 import { eq, desc } from "drizzle-orm";
-import { ACHIEVEMENTS } from "@/lib/constants/achievements";
+import { ACHIEVEMENTS, RARITY_COLORS } from "@/lib/constants/achievements";
 import { getProgressToNextLevel } from "@/lib/constants/levels";
 import { KAIA_MEMBERS } from "@/lib/constants/members";
 import { formatTimeAgo } from "@/lib/utils";
 import type { Metadata } from "next";
+import { 
+  User, 
+  GraduationCap, 
+  Award, 
+  Zap,
+  Sparkles,
+  Flame,
+  Music,
+  Star
+} from "lucide-react";
+import { LevelIcon } from "@/components/shared/LevelIcon";
+import { EmojiIcon } from "@/components/shared/EmojiIcon";
 
 export const metadata: Metadata = { title: "My Profile" };
+
+function getMemberIcon(name: string) {
+  const n = name.toLowerCase();
+  if (n.includes("angela")) return Sparkles;
+  if (n.includes("charice")) return Zap;
+  if (n.includes("alexa")) return Flame;
+  if (n.includes("sophia")) return Music;
+  if (n.includes("charlotte")) return Star;
+  return Star;
+}
 
 export default async function ProfilePage() {
   const session = await auth();
@@ -34,9 +56,12 @@ export default async function ProfilePage() {
 
   return (
     <div style={{ padding: "28px 32px", maxWidth: 800, margin: "0 auto" }}>
-      <h1 style={{ fontSize: 28, fontWeight: 800, color: "white", marginBottom: 28 }}>
-        👤 My Profile
-      </h1>
+      <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 28 }}>
+        <User size={28} style={{ color: "#8B5CF6" }} />
+        <h1 style={{ fontSize: 28, fontWeight: 800, color: "white", margin: 0 }}>
+          My Profile
+        </h1>
+      </div>
 
       {/* Profile card */}
       <div
@@ -54,28 +79,34 @@ export default async function ProfilePage() {
               background: "rgba(139,92,246,0.2)",
               border: "3px solid rgba(139,92,246,0.5)",
               display: "flex", alignItems: "center", justifyContent: "center",
-              fontSize: 40, overflow: "hidden", flexShrink: 0,
+              overflow: "hidden", flexShrink: 0,
             }}
           >
             {session.user.image ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img src={session.user.image} alt="avatar" style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "50%" }} />
-            ) : "🎓"}
+            ) : <GraduationCap size={40} style={{ color: "#a78bfa" }} />}
           </div>
 
           <div style={{ flex: 1 }}>
             <p style={{ color: "#a78bfa", fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", marginBottom: 2 }}>ZAIA STUDENT</p>
             <h2 style={{ color: "white", fontWeight: 800, fontSize: 22 }}>{session.user.name}</h2>
             <p style={{ color: "#64748b", fontSize: 13 }}>{session.user.email}</p>
-            {favMember && (
-              <p style={{ color: favMember.color, fontSize: 13, marginTop: 4 }}>
-                {favMember.emoji} Favorite Professor: {favMember.name}
-              </p>
-            )}
+            {favMember && (() => {
+              const MemberIcon = getMemberIcon(favMember.name);
+              return (
+                <p style={{ display: "flex", alignItems: "center", gap: 6, color: favMember.color, fontSize: 13, marginTop: 4 }}>
+                  <MemberIcon size={14} />
+                  <span>Favorite Professor: {favMember.name}</span>
+                </p>
+              );
+            })()}
           </div>
 
           <div style={{ textAlign: "center" }}>
-            <div style={{ fontSize: 36 }}>{current.badge}</div>
+            <div style={{ display: "flex", justifyContent: "center", marginBottom: 2 }}>
+              <LevelIcon badge={current.badge} size={36} style={{ color: current.color }} />
+            </div>
             <p style={{ color: current.color, fontWeight: 700, fontSize: 14 }}>{current.title}</p>
             <p style={{ color: "#475569", fontSize: 12 }}>Level {current.level}</p>
           </div>
@@ -123,8 +154,8 @@ export default async function ProfilePage() {
             borderRadius: 16, padding: "20px",
           }}
         >
-          <h3 style={{ color: "white", fontWeight: 700, fontSize: 16, marginBottom: 14 }}>
-            🏆 Badges ({earnedAchievements.length})
+          <h3 style={{ display: "flex", alignItems: "center", gap: 6, color: "white", fontWeight: 700, fontSize: 16, marginBottom: 14 }}>
+            <Award size={18} style={{ color: "#f59e0b" }} /> Badges ({earnedAchievements.length})
           </h3>
           {earnedAchievements.length === 0 ? (
             <p style={{ color: "#475569", fontSize: 13 }}>No badges yet. Start engaging!</p>
@@ -142,7 +173,7 @@ export default async function ProfilePage() {
                     fontSize: 22, cursor: "default",
                   }}
                 >
-                  {ach.icon}
+                  <EmojiIcon emoji={ach.icon} size={22} style={{ color: RARITY_COLORS[ach.rarity] || "#8B5CF6" }} />
                 </div>
               ))}
             </div>
@@ -157,8 +188,8 @@ export default async function ProfilePage() {
             borderRadius: 16, padding: "20px",
           }}
         >
-          <h3 style={{ color: "white", fontWeight: 700, fontSize: 16, marginBottom: 14 }}>
-            ⚡ Recent Points
+          <h3 style={{ display: "flex", alignItems: "center", gap: 6, color: "white", fontWeight: 700, fontSize: 16, marginBottom: 14 }}>
+            <Zap size={18} style={{ color: "#8B5CF6" }} /> Recent Points
           </h3>
           {recentTransactions.length === 0 ? (
             <p style={{ color: "#475569", fontSize: 13 }}>No activity yet.</p>

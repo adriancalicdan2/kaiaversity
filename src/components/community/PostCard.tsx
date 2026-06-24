@@ -3,6 +3,28 @@
 import { useState } from "react";
 import { formatTimeAgo } from "@/lib/utils";
 import { likePost, addComment, getPostComments, recordPostView } from "@/lib/actions/posts";
+import { 
+  Heart, 
+  Eye, 
+  MessageSquare, 
+  Crown,
+  Sparkles,
+  Zap,
+  Flame,
+  Music,
+  Star,
+  X
+} from "lucide-react";
+
+function getMemberIcon(name: string) {
+  const n = name.toLowerCase();
+  if (n.includes("angela")) return Sparkles;
+  if (n.includes("charice")) return Zap;
+  if (n.includes("alexa")) return Flame;
+  if (n.includes("sophia")) return Music;
+  if (n.includes("charlotte")) return Star;
+  return Star;
+}
 
 interface CommentRow {
   id: string;
@@ -147,20 +169,24 @@ export default function PostCard({ post, member, initialLiked, currentUserId }: 
       >
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            {member && (
-              <span
-                style={{
-                  fontSize: 13,
-                  fontWeight: 700,
-                  color: member.color || "#8B5CF6",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 4,
-                }}
-              >
-                {member.emoji} {member.name}
-              </span>
-            )}
+            {member && (() => {
+              const MemberIcon = getMemberIcon(member.name);
+              return (
+                <span
+                  style={{
+                    fontSize: 13,
+                    fontWeight: 700,
+                    color: member.color || "#8B5CF6",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 4,
+                  }}
+                >
+                  <MemberIcon size={14} />
+                  <span>{member.name}</span>
+                </span>
+              );
+            })()}
             <span
               style={{
                 fontSize: 11,
@@ -203,7 +229,7 @@ export default function PostCard({ post, member, initialLiked, currentUserId }: 
               padding: 0,
             }}
           >
-            <span style={{ fontSize: 16 }}>{liked ? "❤️" : "🤍"}</span>
+            <Heart size={16} fill={liked ? "#ef4444" : "transparent"} color={liked ? "#ef4444" : "#475569"} />
             {likesCount}
           </button>
           
@@ -216,7 +242,7 @@ export default function PostCard({ post, member, initialLiked, currentUserId }: 
               fontSize: 13,
             }}
           >
-            <span style={{ fontSize: 16 }}>👁️</span>
+            <Eye size={16} color="#475569" />
             {viewsCount}
           </div>
 
@@ -230,7 +256,7 @@ export default function PostCard({ post, member, initialLiked, currentUserId }: 
               marginLeft: "auto",
             }}
           >
-            <span style={{ fontSize: 15 }}>💬</span>
+            <MessageSquare size={16} color="#475569" />
             Discuss
           </div>
         </div>
@@ -278,11 +304,15 @@ export default function PostCard({ post, member, initialLiked, currentUserId }: 
               }}
             >
               <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                {member && (
-                  <span style={{ color: member.color || "white", fontWeight: 700, fontSize: 14 }}>
-                    {member.emoji} Prof. {member.name}
-                  </span>
-                )}
+                {member && (() => {
+                  const MemberIcon = getMemberIcon(member.name);
+                  return (
+                    <span style={{ display: "flex", alignItems: "center", gap: 6, color: member.color || "white", fontWeight: 700, fontSize: 14 }}>
+                      <MemberIcon size={16} />
+                      <span>Prof. {member.name}</span>
+                    </span>
+                  );
+                })()}
                 <span
                   style={{
                     fontSize: 11,
@@ -303,11 +333,13 @@ export default function PostCard({ post, member, initialLiked, currentUserId }: 
                   background: "transparent",
                   border: "none",
                   color: "#64748b",
-                  fontSize: 20,
                   cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
                 }}
               >
-                ✕
+                <X size={20} />
               </button>
             </div>
 
@@ -353,18 +385,18 @@ export default function PostCard({ post, member, initialLiked, currentUserId }: 
                     padding: "6px 12px",
                   }}
                 >
-                  <span>{liked ? "❤️" : "🤍"}</span>
+                  <Heart size={14} fill={liked ? "#ef4444" : "transparent"} color={liked ? "#ef4444" : "#cbd5e1"} />
                   {likesCount} Likes
                 </button>
-                <span style={{ fontSize: 13, color: "#64748b" }}>
-                  👁️ {viewsCount} views
+                <span style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 13, color: "#64748b" }}>
+                  <Eye size={14} /> {viewsCount} views
                 </span>
               </div>
 
               {/* Comments Section */}
               <div>
-                <h3 style={{ color: "white", fontWeight: 700, fontSize: 15, marginBottom: 12 }}>
-                  💬 Discussion
+                <h3 style={{ display: "flex", alignItems: "center", gap: 6, color: "white", fontWeight: 700, fontSize: 15, marginBottom: 12 }}>
+                  <MessageSquare size={16} /> Discussion
                 </h3>
 
                 {/* Add Comment Form */}
@@ -412,8 +444,9 @@ export default function PostCard({ post, member, initialLiked, currentUserId }: 
                     Loading comments...
                   </div>
                 ) : comments.length === 0 ? (
-                  <div style={{ color: "#475569", fontSize: 13, textAlign: "center", padding: 12 }}>
-                    No comments yet. Start the conversation! ✨
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6, color: "#475569", fontSize: 13, textAlign: "center", padding: 12 }}>
+                    <span>No comments yet. Start the conversation!</span>
+                    <Sparkles size={14} />
                   </div>
                 ) : (
                   <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
@@ -428,8 +461,9 @@ export default function PostCard({ post, member, initialLiked, currentUserId }: 
                         }}
                       >
                         <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
-                          <span style={{ fontSize: 12, fontWeight: 700, color: comment.userRole === "ADMIN" ? "#f59e0b" : comment.userRole === "PROFESSOR" ? "#10b981" : "#a78bfa" }}>
-                            {comment.userName || "ZAIA"} {comment.userRole === "ADMIN" && "👑"}
+                          <span style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 12, fontWeight: 700, color: comment.userRole === "ADMIN" ? "#f59e0b" : comment.userRole === "PROFESSOR" ? "#10b981" : "#a78bfa" }}>
+                            <span>{comment.userName || "ZAIA"}</span>
+                            {comment.userRole === "ADMIN" && <Crown size={12} style={{ color: "#f59e0b" }} />}
                           </span>
                           <span style={{ fontSize: 10, color: "#334155" }}>
                             {comment.createdAt ? formatTimeAgo(comment.createdAt) : ""}

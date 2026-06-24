@@ -3,6 +3,7 @@
 import React, { useState, useTransition } from "react";
 import { submitQuizAnswers } from "@/lib/actions/courses";
 import Link from "next/link";
+import { Sparkles, XCircle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface Answer {
@@ -144,7 +145,9 @@ export default function CourseQuiz({ course, quiz, questions }: CourseQuizProps)
         >
           {result.passed ? (
             <div>
-              <div style={{ fontSize: 64, marginBottom: 16 }}>🎉</div>
+              <div style={{ display: "flex", justifyContent: "center", marginBottom: 16 }}>
+                <Sparkles size={64} style={{ color: "#10b981" }} />
+              </div>
               <h2 style={{ color: "#10b981", fontSize: 24, fontWeight: 800, marginBottom: 12 }}>
                 Congratulations, You Passed!
               </h2>
@@ -185,7 +188,9 @@ export default function CourseQuiz({ course, quiz, questions }: CourseQuizProps)
             </div>
           ) : (
             <div>
-              <div style={{ fontSize: 64, marginBottom: 16 }}>❌</div>
+              <div style={{ display: "flex", justifyContent: "center", marginBottom: 16 }}>
+                <XCircle size={64} style={{ color: "#ef4444" }} />
+              </div>
               <h2 style={{ color: "#ef4444", fontSize: 24, fontWeight: 800, marginBottom: 12 }}>
                 Quiz Attempt Failed
               </h2>

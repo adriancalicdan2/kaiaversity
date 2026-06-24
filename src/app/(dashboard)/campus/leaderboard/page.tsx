@@ -5,6 +5,8 @@ import { users } from "@/lib/db/schema";
 import { desc } from "drizzle-orm";
 import { getLevelFromPoints } from "@/lib/constants/levels";
 import { redirect } from "next/navigation";
+import { Trophy } from "lucide-react";
+import { LevelIcon } from "@/components/shared/LevelIcon";
 
 export const metadata: Metadata = { title: "Leaderboard - Campus" };
 
@@ -29,8 +31,9 @@ export default async function LeaderboardPage() {
   return (
     <div style={{ padding: "28px 32px", maxWidth: 800, margin: "0 auto" }}>
       <div style={{ textAlign: "center", marginBottom: 40 }}>
-        <h1 style={{ fontSize: 32, fontWeight: 900, color: "white", marginBottom: 6 }}>
-          🏆 ZAIA Honor Roll
+        <h1 style={{ fontSize: 32, fontWeight: 900, color: "white", marginBottom: 6, display: "flex", alignItems: "center", justifyContent: "center", gap: 10 }}>
+          <Trophy size={32} style={{ color: "#ffd700" }} />
+          <span>ZAIA Honor Roll</span>
         </h1>
         <p style={{ color: "#64748b", fontSize: 14 }}>
           Celebrate the top achieving scholars of KAIAVERSITY. Complete courses and daily quests to rank up!
@@ -133,7 +136,7 @@ export default async function LeaderboardPage() {
                         // eslint-disable-next-line @next/next/no-img-element
                         <img src={user.image} alt="avatar" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                       ) : (
-                        lvlDetails.badge
+                        <LevelIcon badge={lvlDetails.badge} size={14} style={{ color: lvlDetails.color }} />
                       )}
                     </div>
                     <div>
@@ -224,7 +227,7 @@ function renderPodiumCard(
           // eslint-disable-next-line @next/next/no-img-element
           <img src={user.image} alt={user.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
         ) : (
-          lvlDetails.badge
+          <LevelIcon badge={lvlDetails.badge} size={24} style={{ color: badgeColor }} />
         )}
       </div>
 

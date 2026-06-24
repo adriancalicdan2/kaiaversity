@@ -6,6 +6,8 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { toggleCourseActive } from "@/lib/actions/admin";
+import { GraduationCap } from "lucide-react";
+import { EmojiIcon } from "@/components/shared/EmojiIcon";
 
 export const metadata: Metadata = { title: "Course Management — Admin" };
 
@@ -49,8 +51,9 @@ export default async function AdminCoursesPage() {
   return (
     <div style={{ padding: "32px 36px", maxWidth: 1100, margin: "0 auto" }}>
       <div style={{ marginBottom: 28 }}>
-        <h1 style={{ fontSize: 26, fontWeight: 900, color: "white", marginBottom: 4 }}>
-          🎓 Course Management
+        <h1 style={{ fontSize: 26, fontWeight: 900, color: "white", marginBottom: 4, display: "flex", alignItems: "center", gap: 8 }}>
+          <GraduationCap size={26} style={{ color: "#10b981" }} />
+          <span>Course Management</span>
         </h1>
         <p style={{ color: "#64748b", fontSize: 13 }}>
           {allCourses.length} courses · Toggle active status or view course detail
@@ -81,7 +84,7 @@ export default async function AdminCoursesPage() {
                 display: "flex", alignItems: "center", justifyContent: "center",
                 fontSize: 22, flexShrink: 0,
               }}>
-                {course.coverEmoji ?? "📚"}
+                <EmojiIcon emoji={course.coverEmoji ?? "📚"} size={22} style={{ color: "#a78bfa" }} />
               </div>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>

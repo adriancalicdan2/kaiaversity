@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { createPost } from "@/lib/actions/posts";
 import { KAIA_MEMBERS } from "@/lib/constants/members";
+import { BookOpen, Book, Megaphone, ClipboardList, CheckCircle2, AlertCircle, PenTool, Send } from "lucide-react";
 
 export default function AdminDashboardPage() {
   const [isPending, startTransition] = useTransition();
@@ -65,8 +66,9 @@ export default function AdminDashboardPage() {
 
   return (
     <div style={{ padding: "28px 32px", maxWidth: 700, margin: "0 auto" }}>
-      <h1 style={{ fontSize: 26, fontWeight: 800, color: "white", marginBottom: 4 }}>
-        ✍️ Create Post
+      <h1 style={{ fontSize: 26, fontWeight: 800, color: "white", marginBottom: 4, display: "flex", alignItems: "center", gap: 8 }}>
+        <PenTool size={26} style={{ color: "#a78bfa" }} />
+        <span>Create Post</span>
       </h1>
       <p style={{ color: "#64748b", fontSize: 14, marginBottom: 28 }}>
         Post lectures, diary entries, announcements, or assignments.
@@ -92,7 +94,7 @@ export default function AdminDashboardPage() {
               <option value="">— Select Professor —</option>
               {KAIA_MEMBERS.map((m) => (
                 <option key={m.id} value={m.id}>
-                  {m.emoji} {m.name}
+                  {m.name}
                 </option>
               ))}
             </select>
@@ -123,7 +125,13 @@ export default function AdminDashboardPage() {
                     transition: "all 0.2s",
                   }}
                 >
-                  {type === "LECTURE" ? "📖" : type === "DIARY" ? "📔" : type === "ANNOUNCEMENT" ? "📢" : "📝"} {type}
+                  <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+                    {type === "LECTURE" && <BookOpen size={14} />}
+                    {type === "DIARY" && <Book size={14} />}
+                    {type === "ANNOUNCEMENT" && <Megaphone size={14} />}
+                    {type === "ASSIGNMENT" && <ClipboardList size={14} />}
+                    <span>{type}</span>
+                  </span>
                 </button>
               ))}
             </div>
@@ -163,7 +171,10 @@ export default function AdminDashboardPage() {
                 borderRadius: 10, padding: "12px 16px", color: "#34d399", fontSize: 14,
               }}
             >
-              ✅ Post published successfully!
+              <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+                <CheckCircle2 size={16} />
+                <span>Post published successfully!</span>
+              </span>
             </div>
           )}
           {error && (
@@ -173,7 +184,10 @@ export default function AdminDashboardPage() {
                 borderRadius: 10, padding: "12px 16px", color: "#f87171", fontSize: 14,
               }}
             >
-              ❌ {error}
+              <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+                <AlertCircle size={16} />
+                <span>{error}</span>
+              </span>
             </div>
           )}
 
@@ -195,7 +209,16 @@ export default function AdminDashboardPage() {
               transition: "all 0.2s",
             }}
           >
-            {isPending ? "Publishing…" : "🚀 Publish Post"}
+            <span style={{ display: "inline-flex", alignItems: "center", gap: 8, justifyContent: "center", width: "100%" }}>
+              {isPending ? (
+                <span>Publishing…</span>
+              ) : (
+                <>
+                  <span>Publish Post</span>
+                  <Send size={16} />
+                </>
+              )}
+            </span>
           </button>
         </div>
       </form>

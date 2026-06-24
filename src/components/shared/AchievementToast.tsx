@@ -2,6 +2,8 @@
 
 import { useToast } from "@/lib/hooks/use-toast";
 import { AnimatePresence, motion } from "framer-motion";
+import { EmojiIcon } from "@/components/shared/EmojiIcon";
+import { X } from "lucide-react";
 
 export function AchievementToast() {
   const { toasts, dismissToast } = useToast();
@@ -48,10 +50,10 @@ export function AchievementToast() {
                 width: 48, height: 48, borderRadius: "50%",
                 background: "rgba(255,255,255,0.2)",
                 display: "flex", alignItems: "center", justifyContent: "center",
-                fontSize: 24, flexShrink: 0,
+                flexShrink: 0,
               }}
             >
-              {toast.icon ?? "🌟"}
+              <EmojiIcon emoji={toast.icon ?? "🌟"} size={24} style={{ color: "white" }} />
             </div>
             <div style={{ flex: 1, paddingTop: 2 }}>
               <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: "0.08em", color: "rgba(255,255,255,0.8)", marginBottom: 4 }}>
@@ -71,9 +73,10 @@ export function AchievementToast() {
               style={{
                 background: "transparent", border: "none", color: "rgba(255,255,255,0.6)",
                 cursor: "pointer", padding: 4, alignSelf: "flex-start",
+                display: "flex", alignItems: "center", justifyContent: "center",
               }}
             >
-              ✕
+              <X size={16} />
             </button>
           </motion.div>
         ))}

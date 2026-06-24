@@ -1,20 +1,21 @@
 "use client";
-
+ 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
-
+import { Home, School, GraduationCap, MessageSquare, User, LogOut } from "lucide-react";
+ 
 const NAV_ITEMS = [
-  { href: "/dashboard",           icon: "🏠", label: "Home" },
-  { href: "/campus",              icon: "🏫", label: "Campus" },
-  { href: "/professors",          icon: "👩‍🏫", label: "Profs" },
-  { href: "/community",           icon: "💬", label: "Comm" },
-  { href: "/profile",             icon: "👤", label: "Profile" },
+  { href: "/dashboard",           icon: Home, label: "Home" },
+  { href: "/campus",              icon: School, label: "Campus" },
+  { href: "/professors",          icon: GraduationCap, label: "Profs" },
+  { href: "/community",           icon: MessageSquare, label: "Comm" },
+  { href: "/profile",             icon: User, label: "Profile" },
 ];
-
+ 
 export function MobileNav() {
   const pathname = usePathname();
-
+ 
   return (
     <div
       className="md:hidden"
@@ -36,6 +37,7 @@ export function MobileNav() {
     >
       {NAV_ITEMS.map((item) => {
         const active = pathname === item.href || (item.href !== "/dashboard" && pathname.startsWith(item.href));
+        const Icon = item.icon;
         return (
           <Link
             key={item.href}
@@ -52,14 +54,16 @@ export function MobileNav() {
           >
             <div
               style={{
-                fontSize: 20,
                 background: active ? "rgba(139,92,246,0.2)" : "transparent",
                 padding: "6px 12px",
                 borderRadius: 99,
                 transition: "background 0.2s",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
               }}
             >
-              {item.icon}
+              <Icon size={20} style={{ color: active ? "#a78bfa" : "#64748b" }} />
             </div>
             <span style={{ fontSize: 10, fontWeight: active ? 700 : 500 }}>
               {item.label}
@@ -84,15 +88,18 @@ export function MobileNav() {
       >
         <div
           style={{
-            fontSize: 20,
             padding: "6px 12px",
             borderRadius: 99,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
           }}
         >
-          🚪
+          <LogOut size={20} />
         </div>
         <span style={{ fontSize: 10, fontWeight: 500 }}>Logout</span>
       </button>
     </div>
   );
 }
+

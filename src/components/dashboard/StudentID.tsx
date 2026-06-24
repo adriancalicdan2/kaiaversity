@@ -1,5 +1,7 @@
 "use client";
 
+import { GraduationCap, Baby, BookOpen, Briefcase } from "lucide-react";
+import { LevelIcon } from "@/components/shared/LevelIcon";
 import React, { useState } from "react";
 import { motion, useMotionValue, useTransform } from "framer-motion";
 import { getProgressToNextLevel } from "@/lib/constants/levels";
@@ -114,7 +116,7 @@ export default function StudentID({ user }: StudentIDProps) {
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={user.image} alt={user.name || "Student"} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                 ) : (
-                  <span style={{ fontSize: 28 }}>🎓</span>
+                  <GraduationCap size={28} style={{ color: current.color }} />
                 )}
               </div>
               <div>
@@ -130,7 +132,9 @@ export default function StudentID({ user }: StudentIDProps) {
 
             {/* Level/Rarity Badge */}
             <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end" }}>
-              <span style={{ fontSize: 32 }}>{current.badge}</span>
+              <span style={{ display: "inline-flex", padding: "2px 0" }}>
+                <LevelIcon badge={current.badge} size={32} style={{ color: current.color }} />
+              </span>
               <span style={{ fontSize: 10, fontWeight: 700, color: current.color, letterSpacing: "0.08em" }}>
                 {current.title.toUpperCase()}
               </span>
@@ -190,11 +194,11 @@ export default function StudentID({ user }: StudentIDProps) {
               2. Respect fellow ZAIAs and Professors.<br />
               3. Complete daily quests to earn rewards.
             </p>
-            <div style={{ display: "flex", gap: 8, marginTop: 12 }}>
-              <span title="Freshman" style={{ opacity: 0.5, filter: "grayscale(100%)", fontSize: 20 }}>👶</span>
-              <span title="Sophomore" style={{ opacity: 0.5, filter: "grayscale(100%)", fontSize: 20 }}>🎒</span>
-              <span title="Junior" style={{ opacity: 0.5, filter: "grayscale(100%)", fontSize: 20 }}>📚</span>
-              <span title="Senior" style={{ opacity: 0.5, filter: "grayscale(100%)", fontSize: 20 }}>🎓</span>
+            <div style={{ display: "flex", gap: 12, marginTop: 12, alignItems: "center" }}>
+              <span title="Freshman" style={{ opacity: 0.5, display: "inline-flex" }}><Baby size={20} style={{ color: "#64748b" }} /></span>
+              <span title="Sophomore" style={{ opacity: 0.5, display: "inline-flex" }}><Briefcase size={20} style={{ color: "#64748b" }} /></span>
+              <span title="Junior" style={{ opacity: 0.5, display: "inline-flex" }}><BookOpen size={20} style={{ color: "#64748b" }} /></span>
+              <span title="Senior" style={{ opacity: 0.5, display: "inline-flex" }}><GraduationCap size={20} style={{ color: "#64748b" }} /></span>
             </div>
           </div>
 
