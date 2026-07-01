@@ -12,11 +12,16 @@ interface StudentIDProps {
     email: string | null;
     image: string | null;
     points: number;
+    role?: string | null;
     favoriteMember?: string | null;
   };
 }
 
 export default function StudentID({ user }: StudentIDProps) {
+  const isManagement = user.role === "PROFESSOR" || user.role === "ADMIN";
+  const isProf = user.role === "PROFESSOR";
+  const isAdmin = user.role === "ADMIN";
+
   const [isFlipped, setIsFlipped] = useState(false);
   const { current, next, progress, pointsNeeded } = getProgressToNextLevel(user.points);
 
@@ -120,8 +125,8 @@ export default function StudentID({ user }: StudentIDProps) {
                 )}
               </div>
               <div>
-                <span style={{ fontSize: 9, fontWeight: 800, color: current.color, letterSpacing: "0.15em", textTransform: "uppercase" }}>
-                  KAIAVERSITY STUDENT CARD
+                <span style={{ fontSize: 9, fontWeight: 800, color: isManagement ? "#a78bfa" : current.color, letterSpacing: "0.15em", textTransform: "uppercase" }}>
+                  {isProf ? "KAIAVERSITY PROFESSOR CARD" : isAdmin ? "KAIAVERSITY ADMIN CARD" : "KAIAVERSITY STUDENT CARD"}
                 </span>
                 <h3 style={{ color: "white", fontSize: 18, fontWeight: 800, margin: "2px 0 0 0" }}>
                   {user.name || "Anonymous ZAIA"}
@@ -130,44 +135,66 @@ export default function StudentID({ user }: StudentIDProps) {
               </div>
             </div>
 
-            {/* Level/Rarity Badge */}
-            <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end" }}>
-              <span style={{ display: "inline-flex", padding: "2px 0" }}>
-                <LevelIcon badge={current.badge} size={32} style={{ color: current.color }} />
-              </span>
-              <span style={{ fontSize: 10, fontWeight: 700, color: current.color, letterSpacing: "0.08em" }}>
-                {current.title.toUpperCase()}
-              </span>
-              <span style={{ fontSize: 18, fontWeight: 900, color: "white", marginTop: 2 }}>
-                Level {current.level}
-              </span>
-            </div>
+            {/* Level/Rarity Badge / Staff Badge */}
+            {isManagement ? (
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end" }}>
+                <span style={{ display: "inline-flex", padding: "2px 0" }}>
+                  <GraduationCap size={44} style={{ color: "#a78bfa" }} />
+                </span>
+                <span style={{ fontSize: 10, fontWeight: 900, color: "#a78bfa", letterSpacing: "0.1em", marginTop: 4 }}>
+                  {isProf ? "FACULTY" : "ADMIN"}
+                </span>
+              </div>
+            ) : (
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end" }}>
+                <span style={{ display: "inline-flex", padding: "2px 0" }}>
+                  <LevelIcon badge={current.badge} size={32} style={{ color: current.color }} />
+                </span>
+                <span style={{ fontSize: 10, fontWeight: 700, color: current.color, letterSpacing: "0.08em" }}>
+                  {current.title.toUpperCase()}
+                </span>
+                <span style={{ fontSize: 18, fontWeight: 900, color: "white", marginTop: 2 }}>
+                  Level {current.level}
+                </span>
+              </div>
+            )}
           </div>
 
-          {/* Points Progress */}
-          <div style={{ zIndex: 1 }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", fontSize: 11, marginBottom: 6 }}>
-              <div>
-                <span style={{ color: "#475569", fontWeight: 700 }}>TOTAL POINTS: </span>
-                <span style={{ color: "white", fontWeight: 800 }}>{user.points}</span>
+          {/* Points Progress / Faculty Profile */}
+          {isManagement ? (
+            <div style={{ borderTop: "1px solid rgba(255,255,255,0.08)", paddingTop: 12, zIndex: 1 }}>
+              <span style={{ color: "#475569", fontSize: 10, fontWeight: 700, letterSpacing: "0.05em", textTransform: "uppercase" }}>
+                FACULTY PROFILE
+              </span>
+              <p style={{ color: "#cbd5e1", fontSize: 12, margin: "4px 0 0 0", fontStyle: "italic", lineHeight: 1.4 }}>
+                {isProf ? "Educating the future scholars of KAIAVERSITY." : "Overseeing operations and excellence in KAIAVERSITY."}
+              </p>
+            </div>
+          ) : (
+            <div style={{ zIndex: 1 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", fontSize: 11, marginBottom: 6 }}>
+                <div>
+                  <span style={{ color: "#475569", fontWeight: 700 }}>TOTAL POINTS: </span>
+                  <span style={{ color: "white", fontWeight: 800 }}>{user.points}</span>
+                </div>
+                {next && (
+                  <span style={{ color: "#64748b" }}>
+                    {pointsNeeded} pts to {next.title} ({progress}%)
+                  </span>
+                )}
               </div>
-              {next && (
-                <span style={{ color: "#64748b" }}>
-                  {pointsNeeded} pts to {next.title} ({progress}%)
-                </span>
-              )}
+              <div style={{ height: 6, background: "rgba(255,255,255,0.06)", borderRadius: 99, overflow: "hidden" }}>
+                <div
+                  style={{
+                    height: "100%",
+                    width: `${progress}%`,
+                    background: `linear-gradient(90deg, ${current.color}, ${next?.color || current.color})`,
+                    borderRadius: 99,
+                  }}
+                />
+              </div>
             </div>
-            <div style={{ height: 6, background: "rgba(255,255,255,0.06)", borderRadius: 99, overflow: "hidden" }}>
-              <div
-                style={{
-                  height: "100%",
-                  width: `${progress}%`,
-                  background: `linear-gradient(90deg, ${current.color}, ${next?.color || current.color})`,
-                  borderRadius: 99,
-                }}
-              />
-            </div>
-          </div>
+          )}
         </div>
 
         {/* BACK SIDE */}
@@ -177,7 +204,7 @@ export default function StudentID({ user }: StudentIDProps) {
             inset: 0,
             backfaceVisibility: "hidden",
             background: "linear-gradient(135deg, rgba(15, 10, 25, 0.98), rgba(5, 2, 10, 1))",
-            border: `2px solid ${current.color}60`,
+            border: `2px solid ${isManagement ? "#a78bfa" : current.color}60`,
             borderRadius: 20,
             padding: "24px 28px",
             transform: "rotateY(180deg)",
@@ -188,11 +215,23 @@ export default function StudentID({ user }: StudentIDProps) {
           }}
         >
           <div>
-            <h4 style={{ color: "white", fontSize: 14, fontWeight: 700, marginBottom: 8 }}>University Rules & Badges</h4>
+            <h4 style={{ color: "white", fontSize: 14, fontWeight: 700, marginBottom: 8 }}>
+              {isManagement ? "Faculty Guidelines & Honors" : "University Rules & Badges"}
+            </h4>
             <p style={{ color: "#475569", fontSize: 11, lineHeight: 1.4, maxWidth: 300 }}>
-              1. Attend all classes and lectures.<br />
-              2. Respect fellow ZAIAs and Professors.<br />
-              3. Complete daily quests to earn rewards.
+              {isManagement ? (
+                <>
+                  1. Publish high-quality lectures and quizzes.<br />
+                  2. Support student growth and engagement.<br />
+                  3. Maintain review queues and evaluations.
+                </>
+              ) : (
+                <>
+                  1. Attend all classes and lectures.<br />
+                  2. Respect fellow ZAIAs and Professors.<br />
+                  3. Complete daily quests to earn rewards.
+                </>
+              )}
             </p>
             <div style={{ display: "flex", gap: 12, marginTop: 12, alignItems: "center" }}>
               <span title="Freshman" style={{ opacity: 0.5, display: "inline-flex" }}><Baby size={20} style={{ color: "#64748b" }} /></span>

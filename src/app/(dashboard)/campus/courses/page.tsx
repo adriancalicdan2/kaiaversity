@@ -8,6 +8,7 @@ import Link from "next/link";
 import { enrollInCourse } from "@/lib/actions/courses";
 import { isLevelUnlockedForUser } from "@/lib/actions/levels";
 import { redirect } from "next/navigation";
+import { getProfMemberId } from "@/lib/constants/profMap";
 import { 
   BookOpen, 
   Lock, 
@@ -53,9 +54,14 @@ export default async function CoursesPage() {
     where: eq(courseEnrollments.userId, session.user.id),
   });
 
+  const isManagement = session.user && ["ADMIN", "PROFESSOR"].includes(session.user.role);
+  const memberId = getProfMemberId(session.user.email);
+
   const coursesWithUnlockStatus = await Promise.all(
     allCourses.map(async (course) => {
-      const levelUnlock = await isLevelUnlockedForUser(session.user.id, course.minLevel, course.memberId);
+      const levelUnlock = isManagement
+        ? { unlocked: true, reason: undefined }
+        : await isLevelUnlockedForUser(session.user.id, course.minLevel, course.memberId);
       return {
         ...course,
         levelUnlock,
@@ -254,7 +260,7 @@ export default async function CoursesPage() {
                       </span>
                     )}
                     <span style={{ fontSize: 12, color: "#94a3b8", fontWeight: 600 }}>
-                      Prof. {professor?.name || "KAIA"}
+                      Prof. {professor ? (professor.id === memberId ? `${professor.name} (You)` : professor.name) : "KAIA"}
                     </span>
                     <span style={{ display: "inline-flex", alignItems: "center", gap: 4, fontSize: 11, color: "#475569", marginLeft: "auto" }}>
                       <Clock size={11} /> {course.estimatedMinutes} mins
@@ -278,6 +284,26 @@ export default async function CoursesPage() {
                     >
                       Locked (Complete Level {course.minLevel - 1})
                     </button>
+                  ) : isManagement ? (
+                    <Link
+                      href={`/campus/courses/${course.slug}`}
+                      style={{
+                        display: "block",
+                        width: "100%",
+                        textAlign: "center",
+                        padding: "10px 14px",
+                        borderRadius: 10,
+                        fontWeight: 700,
+                        fontSize: 13,
+                        textDecoration: "none",
+                        color: "white",
+                        background: "rgba(255,255,255,0.06)",
+                        border: "1px solid rgba(255,255,255,0.12)",
+                        transition: "background 0.2s ease",
+                      }}
+                    >
+                      Open Course (Prof View)
+                    </Link>
                   ) : enrollment ? (
                     <Link
                       href={`/campus/courses/${course.slug}`}

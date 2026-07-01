@@ -7,6 +7,8 @@ import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
 import { BookOpen, ArrowLeft } from "lucide-react";
 import { EmojiIcon } from "@/components/shared/EmojiIcon";
+import CreateModuleModal from "@/components/admin/CreateModuleModal";
+import { getProfMemberId } from "@/lib/constants/profMap";
 
 export const metadata: Metadata = { title: "Course Detail — Admin" };
 
@@ -32,6 +34,13 @@ export default async function AdminCourseDetailPage({
   ]);
  
   if (!course) notFound();
+
+  const memberId = getProfMemberId(session.user.email);
+
+  // Verify course ownership if the user is a professor
+  if (session.user.role === "PROFESSOR" && course.memberId !== memberId) {
+    redirect("/admin/courses");
+  }
  
   // Fetch member separately
   const member = course.memberId
@@ -59,7 +68,7 @@ export default async function AdminCourseDetailPage({
         <div>
           <h1 style={{ fontSize: 22, fontWeight: 900, color: "white", marginBottom: 4 }}>{course.title}</h1>
           <p style={{ fontSize: 13, color: "#64748b" }}>
-            {member?.stageName ?? "No instructor"} · {course.difficulty} · Min Level {course.minLevel} · {course.pointsReward} pts
+            {member?.stageName ? (member.id === memberId ? `${member.stageName} (You)` : member.stageName) : "No instructor"} · {course.difficulty} · Min Level {course.minLevel} · {course.pointsReward} pts
           </p>
         </div>
         <div style={{ marginLeft: "auto" }}>
@@ -87,6 +96,7 @@ export default async function AdminCourseDetailPage({
           <BookOpen size={16} style={{ color: "#a78bfa" }} />
           <span>Modules ({modules.length})</span>
         </h2>
+        <CreateModuleModal courseId={course.id} />
       </div>
 
       <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>

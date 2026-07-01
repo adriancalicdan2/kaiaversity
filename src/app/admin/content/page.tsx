@@ -6,6 +6,7 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { togglePostPublished, togglePostPinned, deletePost } from "@/lib/actions/admin";
+import { getProfMemberId } from "@/lib/constants/profMap";
 
 export const metadata: Metadata = { title: "Content Management — Admin" };
 
@@ -22,7 +23,11 @@ export default async function AdminContentPage() {
     redirect("/dashboard");
   }
 
+  const isProfessor = session.user.role === "PROFESSOR";
+  const memberId = getProfMemberId(session.user.email);
+
   const allPosts = await db.query.posts.findMany({
+    where: isProfessor && memberId ? eq(posts.memberId, memberId) : undefined,
     orderBy: [desc(posts.createdAt)],
   });
 

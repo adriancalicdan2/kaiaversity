@@ -11,9 +11,11 @@ import {
   events,
   quests,
   achievements,
+  courseModules,
 } from "@/lib/db/schema";
-import { eq, and } from "drizzle-orm";
+import { eq, and, or } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
+import { hashPassword } from "@/lib/auth-crypto";
 
 // ─── Guard helpers ───────────────────────────────────────────────
 async function requireAdmin() {
@@ -237,4 +239,135 @@ export async function deleteAchievement(achievementId: string): Promise<void> {
   await requireAdmin();
   await db.delete(achievements).where(eq(achievements.id, achievementId));
   revalidatePath("/admin/achievements");
+}
+
+export async function createUserManually(
+  name: string,
+  username: string,
+  email: string,
+  role: "ZAIA" | "PROFESSOR" | "ADMIN",
+  password: string
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    await requireAdmin();
+
+    const cleanName = name.trim();
+    const cleanUsername = username.trim();
+    const cleanEmail = email.trim().toLowerCase();
+    const cleanPassword = password.trim();
+
+    if (!cleanName || !cleanUsername || !cleanEmail || !cleanPassword) {
+      return { success: false, error: "All fields are required." };
+    }
+
+    if (cleanUsername.includes("@")) {
+      return { success: false, error: "Username cannot contain '@' symbol." };
+    }
+
+    // Check for existing username or email in SQLite
+    const existing = await db.query.users.findFirst({
+      where: or(eq(users.email, cleanEmail), eq(users.username, cleanUsername)),
+    });
+
+    if (existing) {
+      if (existing.username === cleanUsername) {
+        return { success: false, error: "Username is already taken." };
+      }
+      return { success: false, error: "Email is already registered." };
+    }
+
+    const apiKey = process.env.NEXT_PUBLIC_FIREBASE_API_KEY;
+    if (!apiKey) {
+      return { success: false, error: "Authentication configuration is incomplete. Missing API Key." };
+    }
+
+    // 1. Register account in Firebase Auth immediately via REST API
+    const firebaseRes = await fetch(
+      `https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=${apiKey}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: cleanEmail,
+          password: cleanPassword,
+          returnSecureToken: true,
+        }),
+      }
+    );
+
+    if (!firebaseRes.ok) {
+      const errData = await firebaseRes.json();
+      const message = errData.error?.message;
+      if (message === "EMAIL_EXISTS") {
+        return { success: false, error: "Email is already registered in Firebase." };
+      } else if (message === "WEAK_PASSWORD : Password should be at least 6 characters") {
+        return { success: false, error: "Password must be at least 6 characters long." };
+      }
+      return { success: false, error: message || "Failed to register credentials in Firebase Auth." };
+    }
+
+    const firebaseData = await firebaseRes.json();
+    const firebaseUid = firebaseData.localId; // Firebase UID
+
+    // 2. Insert user record into local SQLite database mapping the UID
+    await db.insert(users).values({
+      id: firebaseUid,
+      name: cleanName,
+      username: cleanUsername,
+      email: cleanEmail,
+      role,
+      passwordHash: null, // Password managed in Firebase Auth
+    });
+
+    revalidatePath("/admin/users");
+    revalidatePath("/admin/dashboard");
+    return { success: true };
+  } catch (err: any) {
+    console.error("Failed to create user manually:", err);
+    return { success: false, error: err.message || "An unexpected error occurred." };
+  }
+}
+
+export async function addCourseModule(
+  courseId: string,
+  title: string,
+  content: string,
+  pointsReward: number
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    await requireAdminOrProfessor();
+
+    const cleanTitle = title.trim();
+    const cleanContent = content.trim();
+
+    if (!cleanTitle || !cleanContent) {
+      return { success: false, error: "Title and content are required." };
+    }
+
+    // Get current maximum order for modules in this course to append sequential ordering
+    const existingModules = await db.query.courseModules.findMany({
+      where: eq(courseModules.courseId, courseId),
+    });
+    const nextOrder = existingModules.reduce((max, m) => Math.max(max, m.order), 0) + 1;
+
+    await db.insert(courseModules).values({
+      courseId,
+      title: cleanTitle,
+      content: cleanContent,
+      pointsReward,
+      order: nextOrder,
+    });
+
+    revalidatePath(`/admin/courses/${courseId}`);
+    revalidatePath(`/campus/courses`);
+    const course = await db.query.courses.findFirst({ where: eq(courses.id, courseId) });
+    if (course) {
+      revalidatePath(`/campus/courses/${course.slug}`);
+    }
+
+    return { success: true };
+  } catch (err: any) {
+    console.error("Failed to add course module:", err);
+    return { success: false, error: err.message || "Failed to add course module." };
+  }
 }

@@ -11,8 +11,8 @@ export const metadata: Metadata = { title: "Quests — Admin" };
 
 export default async function AdminQuestsPage() {
   const session = await auth();
-  if (!session?.user || !["PROFESSOR", "ADMIN"].includes(session.user.role)) {
-    redirect("/dashboard");
+  if (!session?.user || session.user.role !== "ADMIN") {
+    redirect("/admin/dashboard");
   }
 
   // Fetch quests and completion counts in parallel

@@ -6,6 +6,7 @@ import { auth } from "@/lib/auth";
 import { isLevelUnlockedForUser } from "@/lib/actions/levels";
 import { enrollInCourse } from "@/lib/actions/courses";
 import { notFound, redirect } from "next/navigation";
+import { getProfMemberId } from "@/lib/constants/profMap";
 import { formatTimeAgo } from "@/lib/utils";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -68,6 +69,10 @@ export default async function MemberProfilePage({ params }: Props) {
     redirect("/admissions");
   }
 
+  const isManagement = session.user && ["ADMIN", "PROFESSOR"].includes(session.user.role);
+  const memberId = getProfMemberId(session.user.email);
+  const isOwnProfile = memberId === member.id;
+
   // Fetch member posts, liked posts, courses, and course enrollments in parallel
   const [memberPosts, likedPosts, memberCourses, enrollments] = await Promise.all([
     db.query.posts.findMany({
@@ -95,10 +100,14 @@ export default async function MemberProfilePage({ params }: Props) {
   const uniqueLevels = Array.from(new Set(memberCourses.map((c) => c.minLevel)));
   const levelUnlockStatuses: Record<number, { unlocked: boolean; reason?: string }> = {};
  
-  // Check level unlock status for all levels in parallel
+  // Check level unlock status — bypass for management viewing their own courses
   await Promise.all(
     uniqueLevels.map(async (lvl) => {
-      levelUnlockStatuses[lvl] = await isLevelUnlockedForUser(session.user.id, lvl, member.id);
+      if (isManagement && isOwnProfile) {
+        levelUnlockStatuses[lvl] = { unlocked: true };
+      } else {
+        levelUnlockStatuses[lvl] = await isLevelUnlockedForUser(session.user.id, lvl, member.id);
+      }
     })
   );
 
@@ -152,7 +161,7 @@ export default async function MemberProfilePage({ params }: Props) {
               PROFESSOR
             </div>
             <h1 style={{ fontSize: 34, fontWeight: 900, color: "white", marginBottom: 6 }}>
-              {member.name}
+              {isOwnProfile ? `${member.name} (You)` : member.name}
             </h1>
             <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 12 }}>
               {member.position.map((pos) => (

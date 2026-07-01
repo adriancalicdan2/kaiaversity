@@ -2,10 +2,11 @@
 
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { courseEnrollments, courseModuleProgress, userCourseBadges, courses, courseQuizzes, courseQuizQuestions, courseQuizAnswers, courseBadges } from "@/lib/db/schema";
-import { eq, and } from "drizzle-orm";
+import { courseEnrollments, courseModuleProgress, userCourseBadges, courses, courseQuizzes, courseQuizQuestions, courseQuizAnswers, courseBadges, quizAttempts } from "@/lib/db/schema";
+import { eq, and, gte } from "drizzle-orm";
 import { addPoints } from "./points";
 import { revalidatePath } from "next/cache";
+import { getProfMemberId } from "@/lib/constants/profMap";
 
 export async function enrollInCourse(courseId: string) {
   const session = await auth();
@@ -67,6 +68,42 @@ export async function submitQuizAnswers(
   if (!session?.user?.id) throw new Error("Unauthorized");
   const userId = session.user.id;
 
+  // Enforce role separation: Only students can take quizzes. Professors can only take OTHER professors' quizzes (not their own).
+  if (session.user.role === "PROFESSOR") {
+    const memberId = getProfMemberId(session.user.email);
+
+    // Fetch the course to check the instructor
+    const courseObj = await db.query.courses.findFirst({
+      where: eq(courses.id, courseId),
+    });
+
+    if (courseObj && courseObj.memberId === memberId) {
+      throw new Error("You cannot take the quiz for your own course.");
+    }
+  } else if (session.user.role === "ADMIN") {
+    // Admin is allowed to try/test any quiz
+  } else if (session.user.role !== "ZAIA") {
+    throw new Error("Only students and professors from other courses can take quizzes.");
+  }
+
+  // Enforce daily attempt limits for student accounts (ZAIA)
+  if (session.user.role === "ZAIA") {
+    const startOfToday = new Date();
+    startOfToday.setHours(0, 0, 0, 0);
+
+    const todayAttempts = await db.query.quizAttempts.findMany({
+      where: and(
+        eq(quizAttempts.userId, userId),
+        eq(quizAttempts.courseId, courseId),
+        gte(quizAttempts.createdAt, startOfToday)
+      ),
+    });
+
+    if (todayAttempts.length >= 2) {
+      throw new Error("You have reached the maximum of 2 quiz attempts for today. Please try again tomorrow!");
+    }
+  }
+
   // 1. Fetch course & quiz details
   const course = await db.query.courses.findFirst({
     where: eq(courses.id, courseId),
@@ -109,6 +146,15 @@ export async function submitQuizAnswers(
   const scorePercentage = totalQuestions > 0 ? (correctCount / totalQuestions) * 100 : 0;
   const passed = scorePercentage >= (quiz.passingScore ?? 70);
 
+  // 3. Record quiz attempt in history
+  await db.insert(quizAttempts).values({
+    userId,
+    courseId,
+    score: scorePercentage,
+    passed,
+    createdAt: new Date(),
+  });
+
   // 3. Update Enrollment
   const existingEnrollment = await db.query.courseEnrollments.findFirst({
     where: and(
@@ -141,7 +187,7 @@ export async function submitQuizAnswers(
 
   let badgeAwarded = null;
 
-  if (passed) {
+  if (passed && session.user.role === "ZAIA") {
     // 4. Award points if they haven't completed it before
     const alreadyCompletedBefore = existingEnrollment?.status === "COMPLETED";
     if (!alreadyCompletedBefore && course.pointsReward) {

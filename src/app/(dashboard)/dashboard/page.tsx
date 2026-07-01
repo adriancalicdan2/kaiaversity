@@ -70,6 +70,7 @@ export default async function DashboardPage() {
               email: session.user.email ?? null,
               image: session.user.image ?? null,
               points: session.user.points ?? 0,
+              role: session.user.role ?? null,
             }}
           />
 

@@ -71,6 +71,7 @@ export default function CourseQuiz({ course, quiz, questions }: CourseQuizProps)
     totalQuestions: number;
     badgeAwarded?: { name: string; icon: string; description: string } | null;
   } | null>(null);
+  const [submissionError, setSubmissionError] = useState<string | null>(null);
 
   const currentQuestion = shuffledQuestions[currentIdx];
   const hasSelected = currentQuestion ? !!selectedAnswers[currentQuestion.id] : false;
@@ -96,6 +97,7 @@ export default function CourseQuiz({ course, quiz, questions }: CourseQuizProps)
   }
 
   function handleSubmit() {
+    setSubmissionError(null);
     startTransition(async () => {
       const payload = Object.entries(selectedAnswers).map(([qId, ansId]) => ({
         questionId: qId,
@@ -112,8 +114,9 @@ export default function CourseQuiz({ course, quiz, questions }: CourseQuizProps)
           totalQuestions: res.totalQuestions,
           badgeAwarded: res.badgeAwarded,
         });
-      } catch (err) {
+      } catch (err: any) {
         console.error("Failed to submit quiz:", err);
+        setSubmissionError(err.message || "Failed to submit quiz answers. Please try again.");
       }
     });
   }
@@ -303,6 +306,27 @@ export default function CourseQuiz({ course, quiz, questions }: CourseQuizProps)
             );
           })}
         </div>
+
+        {submissionError && (
+          <div
+            style={{
+              background: "rgba(239, 68, 68, 0.1)",
+              border: "1px solid rgba(239, 68, 68, 0.25)",
+              color: "#f87171",
+              borderRadius: 12,
+              padding: "12px 16px",
+              fontSize: 13,
+              fontWeight: 600,
+              marginBottom: 20,
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+            }}
+          >
+            <XCircle size={16} />
+            <span>{submissionError}</span>
+          </div>
+        )}
 
         {/* Action buttons */}
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>

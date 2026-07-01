@@ -17,8 +17,8 @@ const RARITY_COLORS: Record<string, { bg: string; text: string }> = {
 
 export default async function AdminAchievementsPage() {
   const session = await auth();
-  if (!session?.user || !["PROFESSOR", "ADMIN"].includes(session.user.role)) {
-    redirect("/dashboard");
+  if (!session?.user || session.user.role !== "ADMIN") {
+    redirect("/admin/dashboard");
   }
 
   const allAchievements = await db.query.achievements.findMany();

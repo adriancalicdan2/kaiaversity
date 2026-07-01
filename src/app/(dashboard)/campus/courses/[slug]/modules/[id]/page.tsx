@@ -26,6 +26,8 @@ export default async function ModulePage({ params }: PageProps) {
     redirect("/admissions");
   }
 
+  const isManagement = session.user && ["ADMIN", "PROFESSOR"].includes(session.user.role);
+
   // 1. Fetch Course details
   const course = await db.query.courses.findFirst({
     where: eq(courses.slug, slug),
@@ -139,19 +141,9 @@ export default async function ModulePage({ params }: PageProps) {
             <div />
           )}
 
-          <form
-            action={async () => {
-              "use server";
-              await completeModuleProgress(currentModule.id, course.id);
-              if (nextModule) {
-                redirect(`/campus/courses/${slug}/modules/${nextModule.order}`);
-              } else {
-                redirect(`/campus/courses/${slug}`);
-              }
-            }}
-          >
-            <button
-              type="submit"
+          {isManagement ? (
+            <Link
+              href={nextModule ? `/campus/courses/${slug}/modules/${nextModule.order}` : `/campus/courses/${slug}`}
               style={{
                 color: "white",
                 fontSize: 13,
@@ -160,12 +152,42 @@ export default async function ModulePage({ params }: PageProps) {
                 borderRadius: 8,
                 background: "linear-gradient(135deg, #8b5cf6, #ec4899)",
                 border: "none",
+                textDecoration: "none",
+                display: "inline-block",
                 cursor: "pointer",
               }}
             >
-              {nextModule ? "Mark Complete & Next →" : "Finish Reading ✓"}
-            </button>
-          </form>
+              {nextModule ? "Next Lecture →" : "Back to Syllabus ✓"}
+            </Link>
+          ) : (
+            <form
+              action={async () => {
+                "use server";
+                await completeModuleProgress(currentModule.id, course.id);
+                if (nextModule) {
+                  redirect(`/campus/courses/${slug}/modules/${nextModule.order}`);
+                } else {
+                  redirect(`/campus/courses/${slug}`);
+                }
+              }}
+            >
+              <button
+                type="submit"
+                style={{
+                  color: "white",
+                  fontSize: 13,
+                  fontWeight: 700,
+                  padding: "10px 20px",
+                  borderRadius: 8,
+                  background: "linear-gradient(135deg, #8b5cf6, #ec4899)",
+                  border: "none",
+                  cursor: "pointer",
+                }}
+              >
+                {nextModule ? "Mark Complete & Next →" : "Finish Reading ✓"}
+              </button>
+            </form>
+          )}
         </div>
       </div>
     </div>

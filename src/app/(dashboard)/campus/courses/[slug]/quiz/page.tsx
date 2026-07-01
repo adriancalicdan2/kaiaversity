@@ -35,7 +35,11 @@ export default async function QuizPage({ params }: PageProps) {
     redirect("/campus/courses");
   }
 
-  const levelUnlock = await isLevelUnlockedForUser(session.user.id, course.minLevel, course.memberId);
+  const isManagement = session.user && ["ADMIN", "PROFESSOR"].includes(session.user.role);
+
+  const levelUnlock = isManagement
+    ? { unlocked: true, reason: undefined }
+    : await isLevelUnlockedForUser(session.user.id, course.minLevel, course.memberId);
   if (!levelUnlock.unlocked) {
     redirect(`/campus/courses/${slug}`);
   }

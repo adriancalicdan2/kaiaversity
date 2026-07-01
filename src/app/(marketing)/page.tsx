@@ -75,20 +75,13 @@ export default function LandingPage() {
 
       {/* ── Navbar ────────────────────────────────────────────── */}
       <nav className="relative z-10 flex items-center justify-between px-6 py-5 md:px-12 max-w-7xl mx-auto">
-        <div className="flex items-center gap-2">
-          <span className="text-2xl">🎓</span>
-          <span
-            className="font-bold text-xl tracking-wider"
-            style={{
-              background:
-                "linear-gradient(135deg, #FF6B9D, #8B5CF6, #06B6D4)",
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-              backgroundClip: "text",
-            }}
-          >
-            KAIAVERSITY
-          </span>
+        <div className="flex items-center">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/kaiaversity.png"
+            alt="KAIAVERSITY Logo"
+            className="h-12 w-auto object-contain"
+          />
         </div>
         <Link
           href="/admissions"
@@ -374,11 +367,13 @@ export default function LandingPage() {
           fontSize: "14px",
         }}
       >
-        <div className="flex items-center justify-center gap-2 mb-2">
-          <span>🎓</span>
-          <span className="font-bold" style={{ color: "#8B5CF6" }}>
-            KAIAVERSITY
-          </span>
+        <div className="flex items-center justify-center mb-2">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/kaiaversity.png"
+            alt="KAIAVERSITY Logo"
+            className="h-6 w-auto object-contain"
+          />
         </div>
         <p>Made with 💜 by ZAIAs, for ZAIAs. Not affiliated with KAIA's official management.</p>
         <p className="mt-1">Angela 🐻 · Charice 🍒 · Alexa 🐉 · Sophia 🦊 · Charlotte 🍊</p>

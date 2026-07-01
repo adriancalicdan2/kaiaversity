@@ -16,9 +16,15 @@ function getMemberIcon(name: string) {
   return Star;
 }
 
+import { auth } from "@/lib/auth";
+import { getProfMemberId } from "@/lib/constants/profMap";
+
 export const metadata: Metadata = { title: "Professors" };
 
-export default function ProfessorsPage() {
+export default async function ProfessorsPage() {
+  const session = await auth();
+  const memberId = getProfMemberId(session?.user?.email);
+
   return (
     <div style={{ padding: "28px 32px", maxWidth: 1000, margin: "0 auto" }}>
       <h1 style={{ fontSize: 28, fontWeight: 800, color: "white", marginBottom: 6, display: "flex", alignItems: "center", gap: 8 }}>
@@ -73,7 +79,7 @@ export default function ProfessorsPage() {
 
               {/* Name + positions */}
               <h2 style={{ color: member.color, fontWeight: 800, fontSize: 20, marginBottom: 4 }}>
-                {member.name}
+                {member.id === memberId ? `${member.name} (You)` : member.name}
               </h2>
               <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 12 }}>
                 {member.position.map((pos) => (

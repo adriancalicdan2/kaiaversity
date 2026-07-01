@@ -1,14 +1,22 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useEffect } from "react";
 import { createPost } from "@/lib/actions/posts";
 import { KAIA_MEMBERS } from "@/lib/constants/members";
 import { BookOpen, Book, Megaphone, ClipboardList, CheckCircle2, AlertCircle, PenTool, Send } from "lucide-react";
+import { useSession } from "next-auth/react";
+import { getProfMemberId } from "@/lib/constants/profMap";
 
 export default function AdminDashboardPage() {
+  const { data: session } = useSession();
   const [isPending, startTransition] = useTransition();
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState("");
+
+  const userEmail = session?.user?.email;
+  const userRole = session?.user?.role;
+
+  const autoMemberId = getProfMemberId(userEmail) ?? undefined;
 
   const [form, setForm] = useState({
     title: "",
@@ -16,6 +24,12 @@ export default function AdminDashboardPage() {
     type: "LECTURE" as "LECTURE" | "ANNOUNCEMENT" | "DIARY" | "ASSIGNMENT",
     memberId: "",
   });
+
+  useEffect(() => {
+    if (autoMemberId && !form.memberId) {
+      setForm((f) => ({ ...f, memberId: autoMemberId }));
+    }
+  }, [autoMemberId, form.memberId]);
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -86,18 +100,32 @@ export default function AdminDashboardPage() {
           {/* Professor */}
           <div>
             <label style={labelStyle}>Professor (Member)</label>
-            <select
-              value={form.memberId}
-              onChange={(e) => setForm((f) => ({ ...f, memberId: e.target.value }))}
-              style={{ ...inputStyle, cursor: "pointer" }}
-            >
-              <option value="">— Select Professor —</option>
-              {KAIA_MEMBERS.map((m) => (
-                <option key={m.id} value={m.id}>
-                  {m.name}
-                </option>
-              ))}
-            </select>
+            {autoMemberId ? (
+              <div
+                style={{
+                  ...inputStyle,
+                  background: "rgba(139,92,246,0.1)",
+                  border: "1px solid rgba(139,92,246,0.25)",
+                  color: "#a78bfa",
+                  fontWeight: 700,
+                }}
+              >
+                Posting as {KAIA_MEMBERS.find((m) => m.id === autoMemberId)?.name}
+              </div>
+            ) : (
+              <select
+                value={form.memberId}
+                onChange={(e) => setForm((f) => ({ ...f, memberId: e.target.value }))}
+                style={{ ...inputStyle, cursor: "pointer" }}
+              >
+                <option value="">— Select Professor —</option>
+                {KAIA_MEMBERS.map((m) => (
+                  <option key={m.id} value={m.id}>
+                    {m.name}
+                  </option>
+                ))}
+              </select>
+            )}
           </div>
 
           {/* Post type */}

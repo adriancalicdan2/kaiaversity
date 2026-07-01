@@ -520,6 +520,26 @@ export const userMilestoneRewards = sqliteTable("user_milestone_rewards", {
   ),
 });
 
+// ============================================================
+// QUIZ ATTEMPTS
+// ============================================================
+export const quizAttempts = sqliteTable("quiz_attempts", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  userId: text("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  courseId: text("course_id")
+    .notNull()
+    .references(() => courses.id, { onDelete: "cascade" }),
+  score: real("score").notNull(),
+  passed: integer("passed", { mode: "boolean" }).notNull(),
+  createdAt: integer("created_at", { mode: "timestamp" }).$defaultFn(
+    () => new Date()
+  ),
+});
+
 // Type exports
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
@@ -536,3 +556,4 @@ export type CourseEnrollment = typeof courseEnrollments.$inferSelect;
 export type CourseSubmission = typeof courseSubmissions.$inferSelect;
 export type CourseBadge = typeof courseBadges.$inferSelect;
 export type UserCourseBadge = typeof userCourseBadges.$inferSelect;
+export type CourseQuizAttempt = typeof quizAttempts.$inferSelect;

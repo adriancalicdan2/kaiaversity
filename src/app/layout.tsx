@@ -21,6 +21,8 @@ export const metadata: Metadata = {
 };
 
 import { AchievementToast } from "@/components/shared/AchievementToast";
+import FirebaseAnalytics from "@/components/shared/FirebaseAnalytics";
+import { SessionProvider } from "next-auth/react";
 
 export default function RootLayout({
   children,
@@ -33,8 +35,11 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.googleapis.com" />
       </head>
       <body className={inter.className}>
-        {children}
-        <AchievementToast />
+        <SessionProvider>
+          {children}
+          <AchievementToast />
+          <FirebaseAnalytics />
+        </SessionProvider>
       </body>
     </html>
   );

@@ -2,15 +2,44 @@
 
 import { useState } from "react";
 import { signIn } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { signUp } from "@/lib/actions/auth";
 import { AlertTriangle, CheckCircle2 } from "lucide-react";
+import { auth } from "@/lib/firebase";
 
 export default function AuthForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const urlError = searchParams ? searchParams.get("error") : null;
+
+  const getErrorMessage = (code: string) => {
+    switch (code) {
+      case "Configuration":
+        return "Authentication configuration issue. The Google OAuth client credentials in .env.local may be invalid or expired. Please use the Credentials Sign In or Sign Up tabs to test.";
+      case "OAuthSignin":
+      case "OAuthCallback":
+      case "OAuthCreateAccount":
+      case "EmailCreateAccount":
+      case "Callback":
+        return "Failed to complete authentication. Please try again or use the credentials form.";
+      case "OAuthAccountNotLinked":
+        return "This email is already associated with another login method. Please sign in using your original method.";
+      case "EmailSignin":
+        return "The verification email could not be sent. Please check your address.";
+      case "CredentialsSignin":
+        return "Invalid credentials provided. Check your username/email and password.";
+      case "SessionRequired":
+        return "Please sign in to access this page.";
+      default:
+        return `An authentication error occurred: ${code}`;
+    }
+  };
+
   const [activeTab, setActiveTab] = useState<"signin" | "signup">("signin");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(
+    urlError ? getErrorMessage(urlError) : null
+  );
   const [success, setSuccess] = useState<string | null>(null);
 
   // Form states
@@ -106,8 +135,38 @@ export default function AuthForm() {
     }
   };
 
-  const handleGoogleSignIn = () => {
-    signIn("google", { callbackUrl: "/dashboard" });
+  const handleGoogleSignIn = async () => {
+    setLoading(true);
+    setError(null);
+    setSuccess(null);
+    try {
+      const { GoogleAuthProvider, signInWithPopup } = await import("firebase/auth");
+      const provider = new GoogleAuthProvider();
+      const result = await signInWithPopup(auth, provider);
+      const idToken = await result.user.getIdToken();
+
+      const res = await signIn("credentials", {
+        idToken,
+        redirect: false,
+      });
+
+      if (res?.error) {
+        setError("Google credentials verified by Firebase, but session could not be established.");
+      } else {
+        setSuccess("Success! Redirecting...");
+        router.push("/dashboard");
+        router.refresh();
+      }
+    } catch (err: any) {
+      console.error("Google Auth Error:", err);
+      if (err.code === "auth/popup-closed-by-user") {
+        setError("Sign-in popup closed by user before finishing.");
+      } else {
+        setError(err.message || "An unexpected error occurred during Google sign-in.");
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

@@ -8,21 +8,20 @@ import {
   courseEnrollments,
   courseSubmissions,
   events,
-  quests,
-  achievements,
   pointTransactions,
 } from "@/lib/db/schema";
-import { count, desc, sum } from "drizzle-orm";
+import { count, desc, sum, eq, and, inArray } from "drizzle-orm";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { getProfMemberId } from "@/lib/constants/profMap";
 import { 
   Settings, Users, PenTool, MessageSquare, GraduationCap, 
   ClipboardList, Trophy, Coins, Zap, UserPlus, Star, ChevronRight,
   Target
 } from "lucide-react";
 
-export const metadata: Metadata = { title: "Admin Dashboard — KAIAVERSITY" };
+export const metadata: Metadata = { title: "Control Center — KAIAVERSITY" };
 
 export default async function AdminDashboardPage() {
   const session = await auth();
@@ -30,55 +29,115 @@ export default async function AdminDashboardPage() {
     redirect("/dashboard");
   }
 
-  // ── Stats ──
+  const isProfessor = session.user.role === "PROFESSOR";
+  const memberId = getProfMemberId(session.user.email);
+
+  // Fetch professor's course IDs if they are a professor
+  let targetCourseIds: string[] = [];
+  if (isProfessor && memberId) {
+    const profCourses = await db.query.courses.findMany({
+      where: eq(courses.memberId, memberId),
+    });
+    targetCourseIds = profCourses.map((c) => c.id);
+  }
+
   // Fetch stats, total points, recent users, and pending submissions in parallel
   const [
-    [postCount],
-    [userCount],
-    [commentCount],
-    [enrollCount],
-    [submissionCount],
-    [eventCount],
+    [postCountResult],
+    [userCountResult],
+    [commentCountResult],
+    [enrollCountResult],
+    [submissionCountResult],
+    [eventCountResult],
     [pointsResult],
     recentUsers,
     pendingSubmissions
   ] = await Promise.all([
-    db.select({ count: count() }).from(posts),
+    // Post count
+    db.select({ count: count() })
+      .from(posts)
+      .where(isProfessor && memberId ? eq(posts.memberId, memberId) : undefined),
+    
+    // Total users
     db.select({ count: count() }).from(users),
-    db.select({ count: count() }).from(comments),
-    db.select({ count: count() }).from(courseEnrollments),
-    db.select({ count: count() }).from(courseSubmissions),
+
+    // Comments count (comments on professor's posts if professor)
+    isProfessor && memberId
+      ? db.select({ count: count() })
+          .from(comments)
+          .innerJoin(posts, eq(comments.postId, posts.id))
+          .where(eq(posts.memberId, memberId))
+      : db.select({ count: count() }).from(comments),
+
+    // Course Enrollments count
+    isProfessor
+      ? targetCourseIds.length > 0
+        ? db.select({ count: count() }).from(courseEnrollments).where(inArray(courseEnrollments.courseId, targetCourseIds))
+        : [{ count: 0 }]
+      : db.select({ count: count() }).from(courseEnrollments),
+
+    // Submissions pending count
+    isProfessor
+      ? targetCourseIds.length > 0
+        ? db.select({ count: count() }).from(courseSubmissions).where(and(eq(courseSubmissions.status, "PENDING"), inArray(courseSubmissions.courseId, targetCourseIds)))
+        : [{ count: 0 }]
+      : db.select({ count: count() }).from(courseSubmissions).where(eq(courseSubmissions.status, "PENDING")),
+
+    // Active Events count
     db.select({ count: count() }).from(events),
-    db.select({ total: sum(pointTransactions.amount) }).from(pointTransactions),
+
+    // Total points (for professor, sum of points awarded by completing their courses)
+    isProfessor
+      ? targetCourseIds.length > 0
+        ? db.select({ total: sum(pointTransactions.amount) })
+            .from(pointTransactions)
+            .innerJoin(courseEnrollments, eq(pointTransactions.userId, courseEnrollments.userId))
+            .where(and(eq(courseEnrollments.status, "COMPLETED"), inArray(courseEnrollments.courseId, targetCourseIds)))
+        : [{ total: 0 }]
+      : db.select({ total: sum(pointTransactions.amount) }).from(pointTransactions),
+
+    // Recent joined users
     db.query.users.findMany({
       orderBy: [desc(users.joinedAt)],
       limit: 6,
     }),
-    db.query.courseSubmissions.findMany({
-      where: (s, { eq }) => eq(s.status, "PENDING"),
-      orderBy: [desc(courseSubmissions.submittedAt)],
-      limit: 5,
-    }),
+
+    // Pending submissions list
+    isProfessor
+      ? targetCourseIds.length > 0
+        ? db.query.courseSubmissions.findMany({
+            where: and(eq(courseSubmissions.status, "PENDING"), inArray(courseSubmissions.courseId, targetCourseIds)),
+            orderBy: [desc(courseSubmissions.submittedAt)],
+            limit: 5,
+          })
+        : []
+      : db.query.courseSubmissions.findMany({
+          where: eq(courseSubmissions.status, "PENDING"),
+          orderBy: [desc(courseSubmissions.submittedAt)],
+          limit: 5,
+        }),
   ]);
  
   const totalPoints = Number(pointsResult?.total ?? 0);
 
   const stats = [
-    { label: "Enrolled ZAIAs",   value: userCount?.count ?? 0,        icon: Users, color: "#8B5CF6", href: "/admin/users" },
-    { label: "Total Posts",       value: postCount?.count ?? 0,        icon: PenTool,  color: "#06b6d4", href: "/admin/content" },
-    { label: "Comments",          value: commentCount?.count ?? 0,     icon: MessageSquare, color: "#ec4899", href: "/admin/content" },
-    { label: "Enrollments",       value: enrollCount?.count ?? 0,      icon: GraduationCap, color: "#10b981", href: "/admin/courses" },
-    { label: "Pending Reviews",   value: submissionCount?.count ?? 0,  icon: ClipboardList, color: "#f59e0b", href: "/admin/submissions" },
-    { label: "Active Events",     value: eventCount?.count ?? 0,       icon: Trophy, color: "#f43f5e", href: "/admin/events" },
+    ...(isProfessor ? [] : [{ label: "Enrolled ZAIAs",   value: userCountResult?.count ?? 0,        icon: Users, color: "#8B5CF6", href: "/admin/users" }]),
+    { label: "Total Posts",       value: postCountResult?.count ?? 0,        icon: PenTool,  color: "#06b6d4", href: "/admin/content" },
+    { label: "Comments Received", value: commentCountResult?.count ?? 0,     icon: MessageSquare, color: "#ec4899", href: "/admin/content" },
+    { label: "Enrollments",       value: enrollCountResult?.count ?? 0,      icon: GraduationCap, color: "#10b981", href: "/admin/courses" },
+    { label: "Pending Reviews",   value: submissionCountResult?.count ?? 0,  icon: ClipboardList, color: "#f59e0b", href: "/admin/submissions" },
+    ...(isProfessor ? [] : [{ label: "Active Events",     value: eventCountResult?.count ?? 0,       icon: Trophy, color: "#f43f5e", href: "/admin/events" }]),
   ];
 
   const quickActions = [
-    { href: "/admin/users",       icon: Users, label: "Manage Users",       color: "#8B5CF6" },
+    ...(isProfessor ? [] : [{ href: "/admin/users",       icon: Users, label: "Manage Users",       color: "#8B5CF6" }]),
     { href: "/admin/content",     icon: PenTool,  label: "Manage Content",     color: "#06b6d4" },
     { href: "/admin/submissions", icon: ClipboardList, label: "Review Submissions",  color: "#f59e0b" },
     { href: "/admin/courses",     icon: GraduationCap, label: "Manage Courses",      color: "#10b981" },
-    { href: "/admin/events",      icon: Trophy, label: "Manage Events",       color: "#f43f5e" },
-    { href: "/admin/quests",      icon: Target, label: "Manage Quests",       color: "#ec4899" },
+    ...(isProfessor ? [] : [
+      { href: "/admin/events",      icon: Trophy, label: "Manage Events",       color: "#f43f5e" },
+      { href: "/admin/quests",      icon: Target, label: "Manage Quests",       color: "#ec4899" }
+    ]),
   ];
 
   return (
@@ -87,11 +146,11 @@ export default async function AdminDashboardPage() {
       <div style={{ marginBottom: 32 }}>
         <h1 style={{ fontSize: 28, fontWeight: 900, color: "white", marginBottom: 6, display: "flex", alignItems: "center", gap: 10 }}>
           <Settings size={28} style={{ color: "#8B5CF6" }} />
-          <span>Control Center</span>
+          <span>{isProfessor ? "Professor Portal" : "Control Center"}</span>
         </h1>
         <p style={{ color: "#64748b", fontSize: 14 }}>
           Welcome back, <span style={{ color: "#f59e0b" }}>{session.user.name}</span>.
-          Here&apos;s what&apos;s happening in KAIAVERSITY.
+          Here&apos;s what&apos;s happening with your assigned courses.
         </p>
       </div>
 
@@ -162,12 +221,12 @@ export default async function AdminDashboardPage() {
         }}
       >
         <div>
-          <div style={{ fontSize: 12, color: "#64748b", marginBottom: 4 }}>Total Points Awarded</div>
+          <div style={{ fontSize: 12, color: "#64748b", marginBottom: 4 }}>{isProfessor ? "XP Awarded by Your Courses" : "Total Points Awarded"}</div>
           <div style={{ fontSize: 32, fontWeight: 900, color: "#f59e0b" }}>
             {totalPoints.toLocaleString()} <span style={{ fontSize: 16, fontWeight: 600 }}>PTS</span>
           </div>
         </div>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <div style={{ display: "flex", alignItems: "center", justifyItems: "center" }}>
           <Coins size={40} style={{ color: "#f59e0b" }} />
         </div>
       </div>
@@ -220,11 +279,11 @@ export default async function AdminDashboardPage() {
           </div>
         </div>
 
-        {/* Recent Users */}
+        {/* Recently Joined / Students list */}
         <div>
           <h2 style={{ fontSize: 16, fontWeight: 800, color: "white", marginBottom: 14, display: "flex", alignItems: "center", gap: 6 }}>
             <UserPlus size={18} style={{ color: "#10b981" }} />
-            <span>Recently Joined</span>
+            <span>Recently Joined ZAIAs</span>
           </h2>
           <div
             style={{
@@ -310,7 +369,7 @@ export default async function AdminDashboardPage() {
                 borderBottom: "1px solid rgba(255,255,255,0.04)",
               }}
             >
-              Submission for course · {sub.submittedAt?.toLocaleDateString() ?? "Unknown date"}
+              Submission for course · {sub.submittedAt ? new Date(sub.submittedAt).toLocaleDateString() : "Unknown date"}
             </div>
           ))}
         </div>

@@ -8,6 +8,7 @@ import Link from "next/link";
 import { toggleCourseActive } from "@/lib/actions/admin";
 import { GraduationCap } from "lucide-react";
 import { EmojiIcon } from "@/components/shared/EmojiIcon";
+import { getProfMemberId } from "@/lib/constants/profMap";
 
 export const metadata: Metadata = { title: "Course Management — Admin" };
 
@@ -23,9 +24,13 @@ export default async function AdminCoursesPage() {
     redirect("/dashboard");
   }
 
+  const isProfessor = session.user.role === "PROFESSOR";
+  const memberId = getProfMemberId(session.user.email);
+
   // Fetch courses, enrollment counts, and module counts in parallel
   const [allCourses, enrollmentCounts, moduleCounts] = await Promise.all([
     db.query.courses.findMany({
+      where: isProfessor && memberId ? eq(courses.memberId, memberId) : undefined,
       orderBy: [desc(courses.order)],
     }),
     db
@@ -98,7 +103,7 @@ export default async function AdminCoursesPage() {
                   )}
                 </div>
                 <div style={{ fontSize: 11, color: "#64748b" }}>
-                  {member?.stageName ?? "No instructor"} ·{" "}
+                  {member?.stageName ? (member.id === memberId ? `${member.stageName} (You)` : member.stageName) : "No instructor"} ·{" "}
                   {moduleCount} module{moduleCount !== 1 ? "s" : ""} ·{" "}
                   {enrollCount} enrolled ·{" "}
                   {course.pointsReward} pts reward ·{" "}

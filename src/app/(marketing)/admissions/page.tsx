@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { KAIA_MEMBERS } from "@/lib/constants/members";
 import AuthForm from "@/components/auth/AuthForm";
+import { Suspense } from "react";
 
 export const metadata: Metadata = {
   title: "Admissions — Join KAIAVERSITY",
@@ -48,29 +49,36 @@ export default function AdmissionsPage() {
       <div style={{ position: "relative", zIndex: 10, width: "100%", maxWidth: 420 }}>
         {/* Logo */}
         <div style={{ textAlign: "center", marginBottom: 32 }}>
-          <Link href="/" style={{ textDecoration: "none" }}>
-            <div style={{ fontSize: 48, marginBottom: 8 }}>🎓</div>
-            <span
-              style={{
-                fontSize: 24,
-                fontWeight: 800,
-                letterSpacing: "0.1em",
-                background: "linear-gradient(135deg, #FF6B9D, #8B5CF6, #06B6D4)",
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-                backgroundClip: "text",
-              }}
-            >
-              KAIAVERSITY
-            </span>
+          <Link href="/" style={{ textDecoration: "none", display: "inline-flex", justifyContent: "center" }}>
+            <img
+              src="/kaiaversity.png"
+              alt="KAIAVERSITY Logo"
+              style={{ height: 72, width: "auto", objectFit: "contain" }}
+            />
           </Link>
-          <p style={{ color: "#94a3b8", fontSize: 14, marginTop: 8 }}>
+          <p style={{ color: "#94a3b8", fontSize: 14, marginTop: 12 }}>
             Enroll and start your ZAIA journey
           </p>
         </div>
 
         {/* Card */}
-        <AuthForm />
+        <Suspense fallback={
+          <div style={{
+            background: "rgba(255,255,255,0.04)",
+            border: "1px solid rgba(255,255,255,0.08)",
+            borderRadius: 20,
+            padding: "32px 28px",
+            height: 400,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            color: "#64748b"
+          }}>
+            Loading Admissions Office...
+          </div>
+        }>
+          <AuthForm />
+        </Suspense>
 
         {/* Members strip */}
         <div style={{ display: "flex", justifyContent: "center", gap: 12, marginTop: 24 }}>

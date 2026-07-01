@@ -18,8 +18,8 @@ const EVENT_TYPE_COLORS: Record<string, { bg: string; text: string; icon: React.
 
 export default async function AdminEventsPage() {
   const session = await auth();
-  if (!session?.user || !["PROFESSOR", "ADMIN"].includes(session.user.role)) {
-    redirect("/dashboard");
+  if (!session?.user || session.user.role !== "ADMIN") {
+    redirect("/admin/dashboard");
   }
 
   // Fetch events and members in parallel (only 5 members total, so safe to fetch all)

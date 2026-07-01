@@ -6,6 +6,7 @@ import { posts, comments, postLikes, users } from "@/lib/db/schema";
 import { eq, and, sql, desc } from "drizzle-orm";
 import { addCappedPoints } from "./points";
 import { DAILY_CAPS } from "@/lib/constants/levels";
+import { getProfMemberId } from "@/lib/constants/profMap";
 import { revalidatePath } from "next/cache";
 
 /** Like a post — prevents double likes */
@@ -100,8 +101,18 @@ export async function createPost(data: {
     throw new Error("Forbidden");
   }
 
+  let finalMemberId = data.memberId;
+
+  if (session.user.role === "PROFESSOR") {
+    const mapped = getProfMemberId(session.user.email);
+    if (mapped) {
+      finalMemberId = mapped;
+    }
+  }
+
   const post = await db.insert(posts).values({
     ...data,
+    memberId: finalMemberId,
     authorId: session.user.id,
     images: data.images ? JSON.stringify(data.images) : null,
     published: true,

@@ -8,6 +8,7 @@ import Link from "next/link";
 import { enrollInCourse } from "@/lib/actions/courses";
 import { isLevelUnlockedForUser } from "@/lib/actions/levels";
 import { redirect } from "next/navigation";
+import { getProfMemberId } from "@/lib/constants/profMap";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -36,7 +37,12 @@ export default async function CourseDetailPage({ params }: PageProps) {
     redirect("/campus/courses");
   }
 
-  const levelUnlock = await isLevelUnlockedForUser(session.user.id, course.minLevel, course.memberId);
+  const isManagement = session.user && ["ADMIN", "PROFESSOR"].includes(session.user.role);
+  const memberId = getProfMemberId(session.user.email);
+
+  const levelUnlock = isManagement
+    ? { unlocked: true, reason: undefined }
+    : await isLevelUnlockedForUser(session.user.id, course.minLevel, course.memberId);
   if (!levelUnlock.unlocked) {
     redirect("/campus/courses");
   }
@@ -164,7 +170,7 @@ export default async function CourseDetailPage({ params }: PageProps) {
                     </div>
                   </div>
 
-                  {enrollment ? (
+                  {enrollment || isManagement ? (
                     <Link
                       href={`/campus/courses/${course.slug}/modules/${mod.order}`}
                       style={{
@@ -174,7 +180,7 @@ export default async function CourseDetailPage({ params }: PageProps) {
                         textDecoration: "none",
                       }}
                     >
-                      {isRead ? "Re-read" : "Study →"}
+                      {isManagement ? "Preview →" : isRead ? "Re-read" : "Study →"}
                     </Link>
                   ) : (
                     <span style={{ color: "#475569", fontSize: 12 }}>Locked</span>
@@ -197,10 +203,40 @@ export default async function CourseDetailPage({ params }: PageProps) {
             }}
           >
             <h3 style={{ color: "white", fontSize: 14, fontWeight: 700, marginBottom: 12 }}>
-              Your Progress
+              Course Status
             </h3>
 
-            {enrollment ? (
+            {isManagement ? (
+              <div style={{ textAlign: "center", padding: "12px 0" }}>
+                <div style={{ fontSize: 32, marginBottom: 8 }}>🛡️</div>
+                <span style={{ color: "#f59e0b", fontWeight: 700, fontSize: 14, display: "block", marginBottom: 4 }}>
+                  Professor Access
+                </span>
+                <span style={{ color: "#64748b", fontSize: 12, display: "block", lineHeight: 1.4 }}>
+                  Lectures and quiz syllabus are unlocked for review.
+                </span>
+                <Link
+                  href={`/campus/courses/${course.slug}/quiz`}
+                  style={{
+                    display: "block",
+                    width: "100%",
+                    textAlign: "center",
+                    padding: "10px 14px",
+                    borderRadius: 10,
+                    fontWeight: 700,
+                    fontSize: 13,
+                    textDecoration: "none",
+                    color: "white",
+                    background: "rgba(255, 255, 255, 0.06)",
+                    border: "1px solid rgba(255, 255, 255, 0.12)",
+                    marginTop: 14,
+                    transition: "background 0.2s ease",
+                  }}
+                >
+                  Preview Quiz
+                </Link>
+              </div>
+            ) : enrollment ? (
               <div>
                 <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, color: "#94a3b8", marginBottom: 6 }}>
                   <span>Modules Completed</span>
@@ -307,7 +343,7 @@ export default async function CourseDetailPage({ params }: PageProps) {
                 </span>
                 <div>
                   <h4 style={{ color: professor.color, fontWeight: 700, fontSize: 14, margin: 0 }}>
-                    Prof. {professor.name}
+                    Prof. {professor.id === memberId ? `${professor.name} (You)` : professor.name}
                   </h4>
                   <span style={{ color: "#64748b", fontSize: 11 }}>Instructor</span>
                 </div>

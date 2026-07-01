@@ -18,6 +18,11 @@ export async function addPoints(amount: number, reason: string, referenceId?: st
   const user = await db.query.users.findFirst({ where: eq(users.id, userId) });
   if (!user) throw new Error("User not found");
 
+  // Skip points and level systems for staff (professors/admins)
+  if (["PROFESSOR", "ADMIN"].includes(user.role)) {
+    return { newPoints: 0, newLevel: 1, leveledUp: false };
+  }
+
   const oldPoints = user.points ?? 0;
   const newPoints = oldPoints + amount;
   const oldLevel = getLevelFromPoints(oldPoints).level;

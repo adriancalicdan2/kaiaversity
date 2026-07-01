@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { LevelIcon } from "@/components/shared/LevelIcon";
 import { EmojiIcon } from "@/components/shared/EmojiIcon";
+import EditProfileForm from "@/components/profile/EditProfileForm";
 
 export const metadata: Metadata = { title: "My Profile" };
 
@@ -54,13 +55,27 @@ export default async function ProfilePage() {
   const favMember = KAIA_MEMBERS.find((m) => m.slug === user?.favoriteMember);
   const earnedIds = new Set(earnedAchievements.map((e) => e.achievementId));
 
+  const isManagement = user?.role ? ["ADMIN", "PROFESSOR"].includes(user.role) : false;
+  const isProf = user?.role === "PROFESSOR";
+  const isAdmin = user?.role === "ADMIN";
+
   return (
     <div style={{ padding: "28px 32px", maxWidth: 800, margin: "0 auto" }}>
-      <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 28 }}>
-        <User size={28} style={{ color: "#8B5CF6" }} />
-        <h1 style={{ fontSize: 28, fontWeight: 800, color: "white", margin: 0 }}>
-          My Profile
-        </h1>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 28 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <User size={28} style={{ color: "#8B5CF6" }} />
+          <h1 style={{ fontSize: 28, fontWeight: 800, color: "white", margin: 0 }}>
+            My Profile
+          </h1>
+        </div>
+        <EditProfileForm user={{
+          id: user?.id || "",
+          name: user?.name || null,
+          email: user?.email || "",
+          bio: user?.bio || null,
+          image: user?.image || null,
+          favoriteMember: user?.favoriteMember || null,
+        }} />
       </div>
 
       {/* Profile card */}
@@ -89,9 +104,16 @@ export default async function ProfilePage() {
           </div>
 
           <div style={{ flex: 1 }}>
-            <p style={{ color: "#a78bfa", fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", marginBottom: 2 }}>ZAIA STUDENT</p>
-            <h2 style={{ color: "white", fontWeight: 800, fontSize: 22 }}>{session.user.name}</h2>
+            <p style={{ color: "#a78bfa", fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", marginBottom: 2 }}>
+              {isProf ? "FACULTY MEMBER" : isAdmin ? "ADMINISTRATOR" : "ZAIA STUDENT"}
+            </p>
+            <h2 style={{ color: "white", fontWeight: 800, fontSize: 22 }}>{user?.name || session.user.name}</h2>
             <p style={{ color: "#64748b", fontSize: 13 }}>{session.user.email}</p>
+            {user?.bio && (
+              <p style={{ color: "#94a3b8", fontSize: 13, marginTop: 6, fontStyle: "italic", maxWidth: 450, lineHeight: 1.5 }}>
+                "{user.bio}"
+              </p>
+            )}
             {favMember && (() => {
               const MemberIcon = getMemberIcon(favMember.name);
               return (
@@ -103,31 +125,44 @@ export default async function ProfilePage() {
             })()}
           </div>
 
-          <div style={{ textAlign: "center" }}>
-            <div style={{ display: "flex", justifyContent: "center", marginBottom: 2 }}>
-              <LevelIcon badge={current.badge} size={36} style={{ color: current.color }} />
+          {isManagement ? (
+            <div style={{ marginLeft: "auto", textAlign: "right" }}>
+              <span style={{ display: "inline-flex", padding: "4px" }}>
+                <GraduationCap size={44} style={{ color: "#a78bfa" }} />
+              </span>
+              <p style={{ color: "white", fontWeight: 700, fontSize: 13, marginTop: 4 }}>
+                VERIFIED {user?.role}
+              </p>
             </div>
-            <p style={{ color: current.color, fontWeight: 700, fontSize: 14 }}>{current.title}</p>
-            <p style={{ color: "#475569", fontSize: 12 }}>Level {current.level}</p>
-          </div>
+          ) : (
+            <>
+              <div style={{ textAlign: "center" }}>
+                <div style={{ display: "flex", justifyContent: "center", marginBottom: 2 }}>
+                  <LevelIcon badge={current.badge} size={36} style={{ color: current.color }} />
+                </div>
+                <p style={{ color: current.color, fontWeight: 700, fontSize: 14 }}>{current.title}</p>
+                <p style={{ color: "#475569", fontSize: 12 }}>Level {current.level}</p>
+              </div>
 
-          <div style={{ textAlign: "right" }}>
-            <p
-              style={{
-                fontSize: 36, fontWeight: 900,
-                background: "linear-gradient(135deg, #FF6B9D, #8B5CF6)",
-                WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text",
-              }}
-            >
-              {(user?.points ?? 0).toLocaleString()}
-            </p>
-            <p style={{ color: "#475569", fontSize: 12 }}>Total Points</p>
-            {next && <p style={{ color: "#334155", fontSize: 11 }}>{pointsNeeded} to next level</p>}
-          </div>
+              <div style={{ textAlign: "right" }}>
+                <p
+                  style={{
+                    fontSize: 36, fontWeight: 900,
+                    background: "linear-gradient(135deg, #FF6B9D, #8B5CF6)",
+                    WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text",
+                  }}
+                >
+                  {(user?.points ?? 0).toLocaleString()}
+                </p>
+                <p style={{ color: "#475569", fontSize: 12 }}>Total Points</p>
+                {next && <p style={{ color: "#334155", fontSize: 11 }}>{pointsNeeded} to next level</p>}
+              </div>
+            </>
+          )}
         </div>
 
         {/* Progress bar */}
-        {next && (
+        {!isManagement && next && (
           <div style={{ marginTop: 20 }}>
             <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, color: "#475569", marginBottom: 6 }}>
               <span>{current.title}</span>

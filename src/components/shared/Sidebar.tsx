@@ -19,8 +19,11 @@ import {
   Zap,
   Flame,
   Music,
-  Star
+  Star,
+  Shield
 } from "lucide-react";
+import { useSession } from "next-auth/react";
+import { getProfMemberId } from "@/lib/constants/profMap";
 
 const NAV_ITEMS = [
   { href: "/dashboard",               icon: Home, label: "Dashboard" },
@@ -46,6 +49,9 @@ function getMemberIcon(slug: string) {
 
 export default function Sidebar() {
   const pathname = usePathname();
+  const { data: session } = useSession();
+  const isManagement = session?.user && ["ADMIN", "PROFESSOR"].includes(session.user.role);
+  const userMemberId = getProfMemberId(session?.user?.email);
 
   return (
     <aside
@@ -66,26 +72,41 @@ export default function Sidebar() {
     >
       {/* Logo */}
       <Link href="/dashboard" style={{ textDecoration: "none", marginBottom: 28, display: "block", paddingLeft: 6 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <GraduationCap size={20} style={{ color: "#FF6B9D" }} />
-          <span
-            style={{
-              fontWeight: 800,
-              fontSize: 16,
-              letterSpacing: "0.06em",
-              background: "linear-gradient(135deg, #FF6B9D, #8B5CF6)",
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-              backgroundClip: "text",
-            }}
-          >
-            KAIAVERSITY
-          </span>
+        <div style={{ display: "flex", alignItems: "center" }}>
+          <img
+            src="/kaiaversity.png"
+            alt="KAIAVERSITY Logo"
+            style={{ height: 28, width: "auto", objectFit: "contain" }}
+          />
         </div>
       </Link>
 
       {/* Nav */}
       <nav style={{ display: "flex", flexDirection: "column", gap: 2, flex: 1 }}>
+        {isManagement && (
+          <Link
+            href="/admin/dashboard"
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 10,
+              padding: "9px 12px",
+              borderRadius: 10,
+              textDecoration: "none",
+              fontSize: 14,
+              fontWeight: 700,
+              color: "#f59e0b",
+              background: "rgba(245,158,11,0.08)",
+              border: "1px solid rgba(245,158,11,0.2)",
+              marginBottom: 14,
+              transition: "all 0.2s",
+            }}
+          >
+            <Shield size={16} style={{ color: "#f59e0b" }} />
+            Control Center
+          </Link>
+        )}
+
         <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.12em", color: "#334155", marginBottom: 6, paddingLeft: 6 }}>
           CAMPUS
         </p>
@@ -141,7 +162,7 @@ export default function Sidebar() {
               }}
             >
               <MemberIcon size={14} style={{ color: active ? m.color : "#4b5563" }} />
-              {m.name}
+              {m.name}{userMemberId === m.id ? " (You)" : ""}
             </Link>
           );
         })}

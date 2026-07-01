@@ -141,53 +141,70 @@ export function AdminSidebar({ userName, userRole, userPoints }: Props) {
 
       {/* Navigation */}
       <nav style={{ flex: 1, padding: "0 10px" }}>
-        {NAV_SECTIONS.map((section) => (
-          <div key={section.group} style={{ marginBottom: 16 }}>
-            <div
-              style={{
-                fontSize: 9,
-                fontWeight: 800,
-                letterSpacing: "0.12em",
-                color: "#334155",
-                padding: "4px 8px",
-                marginBottom: 4,
-                textTransform: "uppercase",
-              }}
-            >
-              {section.group}
+        {NAV_SECTIONS.map((section) => {
+          const visibleItems = section.items.filter((item) => {
+            if (userRole === "PROFESSOR") {
+              const forbidden = [
+                "/admin/users",
+                "/admin/quests",
+                "/admin/achievements",
+                "/admin/events",
+              ];
+              return !forbidden.includes(item.href);
+            }
+            return true;
+          });
+
+          if (visibleItems.length === 0) return null;
+
+          return (
+            <div key={section.group} style={{ marginBottom: 16 }}>
+              <div
+                style={{
+                  fontSize: 9,
+                  fontWeight: 800,
+                  letterSpacing: "0.12em",
+                  color: "#334155",
+                  padding: "4px 8px",
+                  marginBottom: 4,
+                  textTransform: "uppercase",
+                }}
+              >
+                {section.group}
+              </div>
+              {visibleItems.map((item) => {
+                const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
+                const Icon = item.icon;
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 10,
+                      padding: "9px 10px",
+                      borderRadius: 10,
+                      textDecoration: "none",
+                      fontSize: 13,
+                      fontWeight: isActive ? 700 : 500,
+                      color: isActive ? "#fff" : "#64748b",
+                      background: isActive
+                        ? "linear-gradient(90deg, rgba(245,158,11,0.15), rgba(245,158,11,0.06))"
+                        : "transparent",
+                      borderLeft: isActive ? "2px solid #f59e0b" : "2px solid transparent",
+                      transition: "all 0.15s",
+                      marginBottom: 2,
+                    }}
+                  >
+                    <Icon size={15} style={{ opacity: isActive ? 1 : 0.7 }} />
+                    {item.label}
+                  </Link>
+                );
+              })}
             </div>
-            {section.items.map((item) => {
-              const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
-              const Icon = item.icon;
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 10,
-                    padding: "9px 10px",
-                    borderRadius: 10,
-                    textDecoration: "none",
-                    fontSize: 13,
-                    fontWeight: isActive ? 700 : 500,
-                    color: isActive ? "#fff" : "#64748b",
-                    background: isActive
-                      ? "linear-gradient(90deg, rgba(245,158,11,0.15), rgba(245,158,11,0.06))"
-                      : "transparent",
-                    borderLeft: isActive ? "2px solid #f59e0b" : "2px solid transparent",
-                    transition: "all 0.15s",
-                    marginBottom: 2,
-                  }}
-                >
-                  <Icon size={15} style={{ opacity: isActive ? 1 : 0.7 }} />
-                  {item.label}
-                </Link>
-              );
-            })}
-          </div>
-        ))}
+          );
+        })}
       </nav>
 
       {/* Footer */}

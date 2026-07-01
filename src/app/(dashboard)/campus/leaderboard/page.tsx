@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { users } from "@/lib/db/schema";
-import { desc } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
 import { getLevelFromPoints } from "@/lib/constants/levels";
 import { redirect } from "next/navigation";
 import { Trophy } from "lucide-react";
@@ -16,8 +16,9 @@ export default async function LeaderboardPage() {
     redirect("/admissions");
   }
 
-  // Fetch all users sorted by points
+  // Fetch all students sorted by points
   const allUsers = await db.query.users.findMany({
+    where: eq(users.role, "ZAIA"),
     orderBy: [desc(users.points)],
     limit: 50, // Top 50 ZAIAs
   });

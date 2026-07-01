@@ -10,6 +10,7 @@ import {
   adjustUserPoints,
   deleteUser,
 } from "@/lib/actions/admin";
+import CreateUserModal from "@/components/admin/CreateUserModal";
 
 export const metadata: Metadata = { title: "User Management — Admin" };
 
@@ -21,8 +22,8 @@ const ROLE_COLORS: Record<string, { bg: string; text: string }> = {
 
 export default async function AdminUsersPage() {
   const session = await auth();
-  if (!session?.user || !["PROFESSOR", "ADMIN"].includes(session.user.role)) {
-    redirect("/dashboard");
+  if (!session?.user || session.user.role !== "ADMIN") {
+    redirect("/admin/dashboard");
   }
 
   const allUsers = await db.query.users.findMany({
@@ -33,14 +34,17 @@ export default async function AdminUsersPage() {
 
   return (
     <div style={{ padding: "32px 36px", maxWidth: 1100, margin: "0 auto" }}>
-      <div style={{ marginBottom: 28 }}>
-        <h1 style={{ fontSize: 26, fontWeight: 900, color: "white", marginBottom: 4, display: "flex", alignItems: "center", gap: 8 }}>
-          <Users size={26} style={{ color: "#8b5cf6" }} />
-          <span>User Management</span>
-        </h1>
-        <p style={{ color: "#64748b", fontSize: 13 }}>
-          {allUsers.length} total users · Manage roles, points, and access
-        </p>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 28, flexWrap: "wrap", gap: 16 }}>
+        <div>
+          <h1 style={{ fontSize: 26, fontWeight: 900, color: "white", marginBottom: 4, display: "flex", alignItems: "center", gap: 8 }}>
+            <Users size={26} style={{ color: "#8b5cf6" }} />
+            <span>User Management</span>
+          </h1>
+          <p style={{ color: "#64748b", fontSize: 13 }}>
+            {allUsers.length} total users · Manage roles, points, and access
+          </p>
+        </div>
+        {isAdmin && <CreateUserModal />}
       </div>
 
       <div
