@@ -15,7 +15,6 @@ import {
 } from "@/lib/db/schema";
 import { eq, and, or } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
-import { hashPassword } from "@/lib/auth-crypto";
 
 // ─── Guard helpers ───────────────────────────────────────────────
 async function requireAdmin() {
@@ -322,9 +321,9 @@ export async function createUserManually(
     revalidatePath("/admin/users");
     revalidatePath("/admin/dashboard");
     return { success: true };
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("Failed to create user manually:", err);
-    return { success: false, error: err.message || "An unexpected error occurred." };
+    return { success: false, error: err instanceof Error ? err.message : "An unexpected error occurred." };
   }
 }
 
@@ -366,8 +365,8 @@ export async function addCourseModule(
     }
 
     return { success: true };
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("Failed to add course module:", err);
-    return { success: false, error: err.message || "Failed to add course module." };
+    return { success: false, error: err instanceof Error ? err.message : "Failed to add course module." };
   }
 }

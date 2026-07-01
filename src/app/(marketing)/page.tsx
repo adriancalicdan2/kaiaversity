@@ -375,7 +375,7 @@ export default function LandingPage() {
             className="h-6 w-auto object-contain"
           />
         </div>
-        <p>Made with 💜 by ZAIAs, for ZAIAs. Not affiliated with KAIA's official management.</p>
+        <p>Made with 💜 by ZAIAs, for ZAIAs. Not affiliated with KAIA&apos;s official management.</p>
         <p className="mt-1">Angela 🐻 · Charice 🍒 · Alexa 🐉 · Sophia 🦊 · Charlotte 🍊</p>
       </footer>
     </main>

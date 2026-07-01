@@ -52,7 +52,7 @@ export async function addPoints(amount: number, reason: string, referenceId?: st
 
   try {
     revalidatePath("/dashboard");
-  } catch (err) {
+  } catch (_err) {
     // Ignore error if called during render
   }
   return { newPoints, newLevel, leveledUp: newLevel > oldLevel };
@@ -149,7 +149,7 @@ export async function syncLevelAchievements(userId: string) {
   }
 }
 
-async function checkLevelAchievements(userId: string, newLevel: number) {
+async function checkLevelAchievements(userId: string, _newLevel: number) {
   await syncLevelAchievements(userId);
 }
 

@@ -349,7 +349,7 @@ export default async function CourseDetailPage({ params }: PageProps) {
                 </div>
               </div>
               <p style={{ color: "#94a3b8", fontSize: 12, lineHeight: 1.5, fontStyle: "italic", margin: 0 }}>
-                "{professor.motto}"
+                &ldquo;{professor.motto}&rdquo;
               </p>
             </div>
           )}

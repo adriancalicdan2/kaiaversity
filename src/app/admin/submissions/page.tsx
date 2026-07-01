@@ -1,6 +1,6 @@
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { courseSubmissions, courses, users, quizAttempts } from "@/lib/db/schema";
+import { courseSubmissions, courses, quizAttempts } from "@/lib/db/schema";
 import { desc, eq } from "drizzle-orm";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";

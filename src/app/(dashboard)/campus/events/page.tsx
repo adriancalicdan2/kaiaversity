@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import type { ComponentType } from "react";
 import { db } from "@/lib/db";
 import { events } from "@/lib/db/schema";
 import { KAIA_MEMBERS } from "@/lib/constants/members";
@@ -18,7 +19,7 @@ import {
 
 export const metadata: Metadata = { title: "Events" };
 
-const EVENT_TYPE: Record<string, { icon: any; color: string }> = {
+const EVENT_TYPE: Record<string, { icon: ComponentType<{ size?: number }>; color: string }> = {
   LIVE:     { icon: Radio, color: "#ef4444" },
   CHALLENGE:{ icon: Zap, color: "#f59e0b" },
   FANMEET:  { icon: Users, color: "#8B5CF6" },

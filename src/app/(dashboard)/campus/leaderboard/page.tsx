@@ -168,7 +168,7 @@ export default async function LeaderboardPage() {
 }
 
 function renderPodiumCard(
-  user: any,
+  user: { name: string | null; points: number; image?: string | null },
   index: number,
   badgeColor: string,
   label: string,
@@ -226,7 +226,7 @@ function renderPodiumCard(
       >
         {user.image ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={user.image} alt={user.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+          <img src={user.image} alt={user.name ?? ""} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
         ) : (
           <LevelIcon badge={lvlDetails.badge} size={24} style={{ color: badgeColor }} />
         )}

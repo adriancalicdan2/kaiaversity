@@ -56,7 +56,7 @@ export async function completeQuest(questId: string, pointsOverride?: number) {
   const result = await addPoints(points, `Quest completed`, questId);
   try {
     revalidatePath("/dashboard");
-  } catch (err) {
+  } catch (_err) {
     // Ignore error if called during render
   }
   return { alreadyCompleted: false, points, ...result };
@@ -149,28 +149,28 @@ export async function checkAndSyncDailyQuests() {
   // 3. Complete other quests based on activity, only if not already completed
   if (modulesCount >= 1) {
     if (!completedQuestIds.has("quest-read-lecture")) {
-      try { await completeQuest("quest-read-lecture"); } catch (e) {}
+      try { await completeQuest("quest-read-lecture"); } catch (_e) {}
     }
     if (!completedQuestIds.has("quest-professor-spotlight")) {
-      try { await completeQuest("quest-professor-spotlight"); } catch (e) {}
+      try { await completeQuest("quest-professor-spotlight"); } catch (_e) {}
     }
   }
 
   if (likesCount >= 1 && commentsCount >= 1 && (likesCount + commentsCount) >= 3) {
     if (!completedQuestIds.has("quest-show-love")) {
-      try { await completeQuest("quest-show-love"); } catch (e) {}
+      try { await completeQuest("quest-show-love"); } catch (_e) {}
     }
   }
 
   if (likesCount >= 5) {
     if (!completedQuestIds.has("quest-fan-art")) {
-      try { await completeQuest("quest-fan-art"); } catch (e) {}
+      try { await completeQuest("quest-fan-art"); } catch (_e) {}
     }
   }
 
   if (commentsCount >= 3) {
     if (!completedQuestIds.has("quest-community-helper")) {
-      try { await completeQuest("quest-community-helper"); } catch (e) {}
+      try { await completeQuest("quest-community-helper"); } catch (_e) {}
     }
   }
 

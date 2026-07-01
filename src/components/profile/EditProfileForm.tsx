@@ -56,7 +56,7 @@ export default function EditProfileForm({ user }: EditProfileFormProps) {
           setSuccess(false);
         }, 1200);
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
       setError("An unexpected error occurred. Please try again.");
     } finally {

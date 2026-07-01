@@ -77,7 +77,7 @@ export default function AuthForm() {
         router.push("/dashboard");
         router.refresh();
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
       setError("An unexpected error occurred.");
     } finally {
@@ -127,7 +127,7 @@ export default function AuthForm() {
           router.refresh();
         }
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
       setError("An unexpected error occurred.");
     } finally {
@@ -157,12 +157,13 @@ export default function AuthForm() {
         router.push("/dashboard");
         router.refresh();
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Google Auth Error:", err);
-      if (err.code === "auth/popup-closed-by-user") {
+      const firebaseErr = err as { code?: string; message?: string };
+      if (firebaseErr.code === "auth/popup-closed-by-user") {
         setError("Sign-in popup closed by user before finishing.");
       } else {
-        setError(err.message || "An unexpected error occurred during Google sign-in.");
+        setError(firebaseErr.message || "An unexpected error occurred during Google sign-in.");
       }
     } finally {
       setLoading(false);

@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useSession } from "next-auth/react";
 import { firestore } from "@/lib/firebase";
+import Image from "next/image";
 import {
   collection,
   query,
@@ -11,13 +12,14 @@ import {
   onSnapshot,
   addDoc,
   serverTimestamp,
+  Timestamp,
 } from "firebase/firestore";
 import { Send, Crown, Feather, GraduationCap, Loader2 } from "lucide-react";
 
 interface ChatMessage {
   id: string;
   text: string;
-  createdAt: any;
+  createdAt: Timestamp | null;
   uid: string;
   name: string;
   role: "ADMIN" | "PROFESSOR" | "ZAIA";
@@ -106,10 +108,7 @@ export default function GlobalChat() {
     }
   };
 
-  // Helper to get initials for avatar fallbacks
-  const getInitials = (name: string) => {
-    return name.slice(0, 2).toUpperCase();
-  };
+
 
   // Helper to style roles
   const getRoleBadge = (role: string) => {
@@ -195,18 +194,22 @@ export default function GlobalChat() {
                   )}`}
                 >
                   {msg.image ? (
-                    <img
+                    <Image
                       src={msg.image}
                       alt={msg.name}
+                      width={36}
+                      height={36}
                       className="w-full h-full object-cover"
                       onError={(e) => {
                         (e.target as HTMLImageElement).src = "/kaiaversity.png";
                       }}
                     />
                   ) : (
-                    <img
+                    <Image
                       src="/kaiaversity.png"
                       alt={msg.name}
+                      width={36}
+                      height={36}
                       className="w-full h-full object-cover p-1 bg-black/30"
                     />
                   )}

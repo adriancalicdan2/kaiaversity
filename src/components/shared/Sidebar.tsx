@@ -14,7 +14,6 @@ import {
   MessageSquare,
   User,
   LogOut,
-  GraduationCap,
   Sparkles,
   Zap,
   Flame,

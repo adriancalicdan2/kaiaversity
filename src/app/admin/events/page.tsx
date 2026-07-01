@@ -9,7 +9,7 @@ import { Trophy, Plus, Trash2, Video, Zap, Mic, Cake } from "lucide-react";
 
 export const metadata: Metadata = { title: "Events — Admin" };
 
-const EVENT_TYPE_COLORS: Record<string, { bg: string; text: string; icon: React.ComponentType<any> }> = {
+const EVENT_TYPE_COLORS: Record<string, { bg: string; text: string; icon: React.ComponentType<{ size?: number; style?: React.CSSProperties }> }> = {
   LIVE:      { bg: "rgba(239,68,68,0.12)",   text: "#ef4444",  icon: Video },
   CHALLENGE: { bg: "rgba(139,92,246,0.12)",  text: "#a78bfa",  icon: Zap },
   FANMEET:   { bg: "rgba(236,72,153,0.12)",  text: "#ec4899",  icon: Mic },

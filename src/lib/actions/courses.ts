@@ -2,7 +2,7 @@
 
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { courseEnrollments, courseModuleProgress, userCourseBadges, courses, courseQuizzes, courseQuizQuestions, courseQuizAnswers, courseBadges, quizAttempts } from "@/lib/db/schema";
+import { courseEnrollments, courseModuleProgress, userCourseBadges, courses, courseQuizzes, courseQuizQuestions, courseBadges, quizAttempts } from "@/lib/db/schema";
 import { eq, and, gte } from "drizzle-orm";
 import { addPoints } from "./points";
 import { revalidatePath } from "next/cache";

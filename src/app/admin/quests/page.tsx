@@ -1,6 +1,6 @@
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { quests, userQuests } from "@/lib/db/schema";
+import { userQuests } from "@/lib/db/schema";
 import { count, eq } from "drizzle-orm";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";

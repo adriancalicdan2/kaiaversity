@@ -2,7 +2,7 @@
 
 import { db } from "@/lib/db";
 import { courses, courseEnrollments } from "@/lib/db/schema";
-import { eq, and, inArray } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 
 export async function isLevelUnlockedForUser(
   userId: string,

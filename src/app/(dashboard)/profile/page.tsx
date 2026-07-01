@@ -1,4 +1,5 @@
 import { auth } from "@/lib/auth";
+import { createElement } from "react";
 import { db } from "@/lib/db";
 import { users, userAchievements, pointTransactions } from "@/lib/db/schema";
 import { eq, desc } from "drizzle-orm";
@@ -31,6 +32,10 @@ function getMemberIcon(name: string) {
   if (n.includes("sophia")) return Music;
   if (n.includes("charlotte")) return Star;
   return Star;
+}
+
+function MemberIcon({ name, size, style }: { name: string; size?: number; style?: React.CSSProperties }) {
+  return createElement(getMemberIcon(name), { size, style });
 }
 
 export default async function ProfilePage() {
@@ -111,18 +116,15 @@ export default async function ProfilePage() {
             <p style={{ color: "#64748b", fontSize: 13 }}>{session.user.email}</p>
             {user?.bio && (
               <p style={{ color: "#94a3b8", fontSize: 13, marginTop: 6, fontStyle: "italic", maxWidth: 450, lineHeight: 1.5 }}>
-                "{user.bio}"
+                &ldquo;{user.bio}&rdquo;
               </p>
             )}
-            {favMember && (() => {
-              const MemberIcon = getMemberIcon(favMember.name);
-              return (
-                <p style={{ display: "flex", alignItems: "center", gap: 6, color: favMember.color, fontSize: 13, marginTop: 4 }}>
-                  <MemberIcon size={14} />
-                  <span>Favorite Professor: {favMember.name}</span>
-                </p>
-              );
-            })()}
+            {favMember && (
+              <p style={{ display: "flex", alignItems: "center", gap: 6, color: favMember.color, fontSize: 13, marginTop: 4 }}>
+                <MemberIcon name={favMember.name} size={14} />
+                <span>Favorite Professor: {favMember.name}</span>
+              </p>
+            )}
           </div>
 
           {isManagement ? (

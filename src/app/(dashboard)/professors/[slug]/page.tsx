@@ -1,4 +1,5 @@
 import { getMemberBySlug, KAIA_MEMBERS } from "@/lib/constants/members";
+import { createElement } from "react";
 import { db } from "@/lib/db";
 import { posts, courses, courseEnrollments, postLikes } from "@/lib/db/schema";
 import { eq, desc, and, asc } from "drizzle-orm";
@@ -32,6 +33,10 @@ function getMemberIcon(name: string) {
   if (n.includes("sophia")) return Music;
   if (n.includes("charlotte")) return Star;
   return Star;
+}
+
+function MemberIcon({ name, size, style }: { name: string; size?: number; style?: React.CSSProperties }) {
+  return createElement(getMemberIcon(name), { size, style });
 }
 
 interface Props {
@@ -142,10 +147,7 @@ export default async function MemberProfilePage({ params }: Props) {
             display: "flex", alignItems: "center", justifyContent: "center",
           }}
         >
-          {(() => {
-            const MemberIcon = getMemberIcon(member.name);
-            return <MemberIcon size={48} style={{ color: member.color }} />;
-          })()}
+          <MemberIcon name={member.name} size={48} style={{ color: member.color }} />
         </div>
 
           {/* Info */}
@@ -226,7 +228,6 @@ export default async function MemberProfilePage({ params }: Props) {
                 {memberCourses.map((course) => {
                   const enrollment = enrollments.find((e) => e.courseId === course.id);
                   const isCompleted = enrollment?.status === "COMPLETED";
-                  const isInProgress = enrollment?.status === "IN_PROGRESS";
                   const unlockStatus = levelUnlockStatuses[course.minLevel] || { unlocked: true };
                   const isLocked = !unlockStatus.unlocked;
 
@@ -380,15 +381,10 @@ export default async function MemberProfilePage({ params }: Props) {
               borderRadius: 16, padding: "20px", position: "sticky", top: 20,
             }}
           >
-            {(() => {
-              const MemberIcon = getMemberIcon(member.name);
-              return (
-                <h3 style={{ display: "flex", alignItems: "center", gap: 6, color: member.color, fontWeight: 700, fontSize: 15, marginBottom: 14 }}>
-                  <MemberIcon size={16} />
-                  <span>Fun Facts</span>
-                </h3>
-              );
-            })()}
+            <h3 style={{ display: "flex", alignItems: "center", gap: 6, color: member.color, fontWeight: 700, fontSize: 15, marginBottom: 14 }}>
+              <MemberIcon name={member.name} size={16} />
+              <span>Fun Facts</span>
+            </h3>
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
               {member.funFacts.map((fact, i) => (
                 <div

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition, useEffect } from "react";
+import { useState, useTransition } from "react";
 import { createPost } from "@/lib/actions/posts";
 import { KAIA_MEMBERS } from "@/lib/constants/members";
 import { BookOpen, Book, Megaphone, ClipboardList, CheckCircle2, AlertCircle, PenTool, Send } from "lucide-react";
@@ -22,14 +22,8 @@ export default function AdminDashboardPage() {
     title: "",
     content: "",
     type: "LECTURE" as "LECTURE" | "ANNOUNCEMENT" | "DIARY" | "ASSIGNMENT",
-    memberId: "",
+    memberId: autoMemberId ?? "",
   });
-
-  useEffect(() => {
-    if (autoMemberId && !form.memberId) {
-      setForm((f) => ({ ...f, memberId: autoMemberId }));
-    }
-  }, [autoMemberId, form.memberId]);
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();

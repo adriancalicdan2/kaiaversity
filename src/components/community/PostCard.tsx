@@ -64,7 +64,7 @@ const POST_TYPE_STYLES: Record<string, { bg: string; color: string; label: strin
   ASSIGNMENT:   { bg: "rgba(16,185,129,0.15)", color: "#10b981", label: "Assignment" },
 };
 
-export default function PostCard({ post, member, initialLiked, currentUserId }: PostCardProps) {
+export default function PostCard({ post, member, initialLiked, currentUserId: _currentUserId }: PostCardProps) {
   const [liked, setLiked] = useState(initialLiked);
   const [likesCount, setLikesCount] = useState(post.likes ?? 0);
   const [viewsCount, setViewsCount] = useState(post.views ?? 0);

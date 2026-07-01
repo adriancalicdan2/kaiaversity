@@ -114,9 +114,9 @@ export default function CourseQuiz({ course, quiz, questions }: CourseQuizProps)
           totalQuestions: res.totalQuestions,
           badgeAwarded: res.badgeAwarded,
         });
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error("Failed to submit quiz:", err);
-        setSubmissionError(err.message || "Failed to submit quiz answers. Please try again.");
+        setSubmissionError(err instanceof Error ? err.message : "Failed to submit quiz answers. Please try again.");
       }
     });
   }

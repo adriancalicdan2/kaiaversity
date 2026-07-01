@@ -39,7 +39,7 @@ export default function CreateUserModal() {
           setSuccess(false);
         }, 1200);
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
       setError("An unexpected error occurred. Please try again.");
     } finally {
@@ -158,7 +158,7 @@ export default function CreateUserModal() {
                 </label>
                 <select
                   value={role}
-                  onChange={(e) => setRole(e.target.value as any)}
+                  onChange={(e) => setRole(e.target.value as "ZAIA" | "PROFESSOR" | "ADMIN")}
                   className="w-full bg-[#161622] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition"
                 >
                   <option value="ZAIA">ZAIA (Student)</option>
