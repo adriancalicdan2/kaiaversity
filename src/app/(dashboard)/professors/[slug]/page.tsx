@@ -1,5 +1,6 @@
 import { getMemberBySlug, KAIA_MEMBERS } from "@/lib/constants/members";
 import { createElement } from "react";
+import type { CSSProperties } from "react";
 import { db } from "@/lib/db";
 import { posts, courses, courseEnrollments, postLikes } from "@/lib/db/schema";
 import { eq, desc, and, asc } from "drizzle-orm";
@@ -35,7 +36,7 @@ function getMemberIcon(name: string) {
   return Star;
 }
 
-function MemberIcon({ name, size, style }: { name: string; size?: number; style?: React.CSSProperties }) {
+function MemberIcon({ name, size, style }: { name: string; size?: number; style?: CSSProperties }) {
   return createElement(getMemberIcon(name), { size, style });
 }
 

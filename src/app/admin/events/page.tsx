@@ -1,4 +1,5 @@
 import { auth } from "@/lib/auth";
+import type { ComponentType, CSSProperties } from "react";
 import { db } from "@/lib/db";
 import { events, members } from "@/lib/db/schema";
 import { desc } from "drizzle-orm";
@@ -9,7 +10,7 @@ import { Trophy, Plus, Trash2, Video, Zap, Mic, Cake } from "lucide-react";
 
 export const metadata: Metadata = { title: "Events — Admin" };
 
-const EVENT_TYPE_COLORS: Record<string, { bg: string; text: string; icon: React.ComponentType<{ size?: number; style?: React.CSSProperties }> }> = {
+const EVENT_TYPE_COLORS: Record<string, { bg: string; text: string; icon: ComponentType<{ size?: number; style?: CSSProperties }> }> = {
   LIVE:      { bg: "rgba(239,68,68,0.12)",   text: "#ef4444",  icon: Video },
   CHALLENGE: { bg: "rgba(139,92,246,0.12)",  text: "#a78bfa",  icon: Zap },
   FANMEET:   { bg: "rgba(236,72,153,0.12)",  text: "#ec4899",  icon: Mic },

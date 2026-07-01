@@ -1,5 +1,6 @@
 import { auth } from "@/lib/auth";
 import { createElement } from "react";
+import type { CSSProperties } from "react";
 import { db } from "@/lib/db";
 import { users, userAchievements, pointTransactions } from "@/lib/db/schema";
 import { eq, desc } from "drizzle-orm";
@@ -34,7 +35,7 @@ function getMemberIcon(name: string) {
   return Star;
 }
 
-function MemberIcon({ name, size, style }: { name: string; size?: number; style?: React.CSSProperties }) {
+function MemberIcon({ name, size, style }: { name: string; size?: number; style?: CSSProperties }) {
   return createElement(getMemberIcon(name), { size, style });
 }
 
