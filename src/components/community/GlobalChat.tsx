@@ -3,7 +3,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useSession } from "next-auth/react";
 import { firestore } from "@/lib/firebase";
-import Image from "next/image";
 import {
   collection,
   query,
@@ -194,22 +193,20 @@ export default function GlobalChat() {
                   )}`}
                 >
                   {msg.image ? (
-                    <Image
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
                       src={msg.image}
                       alt={msg.name}
-                      width={36}
-                      height={36}
                       className="w-full h-full object-cover"
                       onError={(e) => {
                         (e.target as HTMLImageElement).src = "/kaiaversity.png";
                       }}
                     />
                   ) : (
-                    <Image
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
                       src="/kaiaversity.png"
                       alt={msg.name}
-                      width={36}
-                      height={36}
                       className="w-full h-full object-cover p-1 bg-black/30"
                     />
                   )}
