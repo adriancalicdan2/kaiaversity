@@ -60,10 +60,17 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 TURSO_DATABASE_URL=file:local.db
 TURSO_AUTH_TOKEN=
 
-# Google OAuth (Optional)
-AUTH_GOOGLE_ID=
-AUTH_GOOGLE_SECRET=
+# Firebase client config (required for Google sign-in and global chat)
+NEXT_PUBLIC_FIREBASE_API_KEY=
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=
+NEXT_PUBLIC_FIREBASE_APP_ID=
+NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID=
 ```
+
+On Netlify, add the same Firebase variables under Site configuration -> Environment variables. Missing or invalid `NEXT_PUBLIC_FIREBASE_API_KEY` values can cause Firebase auth/chat to fail at runtime.
 
 ### 3. Install Dependencies
 ```bash

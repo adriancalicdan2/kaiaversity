@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useSession } from "next-auth/react";
-import { firestore } from "@/lib/firebase";
+import { getFirebaseFirestore, isFirebaseConfigured } from "@/lib/firebase";
 import {
   collection,
   query,
@@ -34,14 +34,16 @@ export default function GlobalChat() {
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const firebaseReady = isFirebaseConfigured();
 
   // 1. Subscribe to Firestore Global Chat Messages
   useEffect(() => {
-    const q = query(
-      collection(firestore, "global-chat"),
-      orderBy("createdAt", "desc"),
-      limit(100)
-    );
+    if (!firebaseReady) {
+      return;
+    }
+
+    const db = getFirebaseFirestore();
+    const q = query(collection(db, "global-chat"), orderBy("createdAt", "desc"), limit(100));
 
     const unsubscribe = onSnapshot(
       q,
@@ -72,7 +74,7 @@ export default function GlobalChat() {
     );
 
     return () => unsubscribe();
-  }, []);
+  }, [firebaseReady]);
 
   // 2. Auto-scroll to bottom of the chat container
   useEffect(() => {
@@ -89,7 +91,8 @@ export default function GlobalChat() {
     setInputText("");
 
     try {
-      await addDoc(collection(firestore, "global-chat"), {
+      const db = getFirebaseFirestore();
+      await addDoc(collection(db, "global-chat"), {
         text: messageText,
         createdAt: serverTimestamp(),
         uid: session.user.id,
@@ -145,7 +148,7 @@ export default function GlobalChat() {
     }
   };
 
-  if (status === "loading" || loading) {
+  if (status === "loading" || (firebaseReady && loading)) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-slate-400">
         <Loader2 className="animate-spin text-violet-500 mb-3" size={36} />
@@ -162,6 +165,16 @@ export default function GlobalChat() {
         <p className="text-slate-400 text-sm mb-4">
           Please sign in to read and participate in the real-time global chat with other members.
         </p>
+      </div>
+    );
+  }
+
+  if (!firebaseReady) {
+    return (
+      <div className="text-center py-16 bg-white/5 border border-white/10 rounded-2xl p-8 max-w-md mx-auto">
+        <span className="text-4xl mb-4 block">âš ï¸</span>
+        <h3 className="text-lg font-bold text-white mb-2">Chat Unavailable</h3>
+        <p className="text-slate-400 text-sm">Global chat is unavailable until Firebase is configured.</p>
       </div>
     );
   }
