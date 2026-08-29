@@ -12,9 +12,11 @@ import {
   quests,
   achievements,
   courseModules,
+  pointTransactions,
 } from "@/lib/db/schema";
 import { eq, and, or } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
+import { getLevelFromPoints } from "@/lib/constants/levels";
 
 // ─── Guard helpers ───────────────────────────────────────────────
 async function requireAdmin() {
@@ -49,9 +51,29 @@ export async function adjustUserPoints(userId: string, delta: number): Promise<v
   await requireAdmin();
   const user = await db.query.users.findFirst({ where: eq(users.id, userId) });
   if (!user) return;
+  
   const newPoints = Math.max(0, (user.points ?? 0) + delta);
-  await db.update(users).set({ points: newPoints }).where(eq(users.id, userId));
+  const newLevel = getLevelFromPoints(newPoints).level;
+
+  await db.update(users).set({
+    points: newPoints,
+    level: newLevel,
+    lastActive: new Date(),
+  }).where(eq(users.id, userId));
+
+  // Log the admin transaction
+  await db.insert(pointTransactions).values({
+    userId,
+    amount: delta,
+    reason: `Admin adjustment (${delta > 0 ? "+" : ""}${delta} pts)`,
+  });
+
   revalidatePath("/admin/users");
+  revalidatePath("/admin/dashboard");
+  revalidatePath("/dashboard");
+  revalidatePath("/profile");
+  revalidatePath("/campus/leaderboard");
+  revalidatePath("/campus");
 }
 
 export async function deleteUser(userId: string): Promise<void> {

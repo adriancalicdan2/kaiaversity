@@ -1,6 +1,6 @@
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { posts, postLikes } from "@/lib/db/schema";
+import { users, posts, postLikes } from "@/lib/db/schema";
 import { eq, desc } from "drizzle-orm";
 import { KAIA_MEMBERS } from "@/lib/constants/members";
 import { DAILY_QUESTS } from "@/lib/constants/quests";
@@ -25,8 +25,11 @@ export default async function DashboardPage() {
   const session = await auth();
   if (!session?.user?.id) return null;
 
-  // Fetch recent posts, liked posts, and sync daily quests in parallel
-  const [recentPosts, likedPosts, todayQuestStatus] = await Promise.all([
+  // Fetch live user, recent posts, liked posts, and sync daily quests in parallel
+  const [currentUser, recentPosts, likedPosts, todayQuestStatus] = await Promise.all([
+    db.query.users.findFirst({
+      where: eq(users.id, session.user.id),
+    }),
     db.query.posts.findMany({
       where: eq(posts.published, true),
       orderBy: [desc(posts.createdAt)],
@@ -48,7 +51,7 @@ export default async function DashboardPage() {
       {/* ── Header ──────────────────────────────────────── */}
       <div style={{ marginBottom: 32 }}>
         <h1 style={{ fontSize: 26, fontWeight: 800, color: "white", marginBottom: 4 }}>
-          Welcome back, {session.user.name?.split(" ")[0] ?? "ZAIA"}! 👋
+          Welcome back, {currentUser?.name?.split(" ")[0] ?? session.user.name?.split(" ")[0] ?? "ZAIA"}! 👋
         </h1>
         <p style={{ color: "#64748b", fontSize: 14 }}>
           {new Date().toLocaleDateString("en-PH", {
@@ -66,11 +69,11 @@ export default async function DashboardPage() {
         <div>
           <StudentID
             user={{
-              name: session.user.name ?? null,
-              email: session.user.email ?? null,
-              image: session.user.image ?? null,
-              points: session.user.points ?? 0,
-              role: session.user.role ?? null,
+              name: currentUser?.name ?? session.user.name ?? null,
+              email: currentUser?.email ?? session.user.email ?? null,
+              image: currentUser?.image ?? session.user.image ?? null,
+              points: currentUser?.points ?? session.user.points ?? 0,
+              role: currentUser?.role ?? session.user.role ?? null,
             }}
           />
 
