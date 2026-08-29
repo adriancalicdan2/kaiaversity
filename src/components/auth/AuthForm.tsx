@@ -140,6 +140,18 @@ export default function AuthForm() {
     setError(null);
     setSuccess(null);
     try {
+      // Check if Firebase is configured before attempting Google sign-in
+      const { isFirebaseConfigured } = await import("@/lib/firebase");
+      if (!isFirebaseConfigured()) {
+        setError(
+          "Google sign-in is unavailable: Firebase is not configured. " +
+          "Please ensure NEXT_PUBLIC_FIREBASE_API_KEY, NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN, " +
+          "NEXT_PUBLIC_FIREBASE_PROJECT_ID, and NEXT_PUBLIC_FIREBASE_APP_ID are set in .env.local."
+        );
+        setLoading(false);
+        return;
+      }
+
       const { GoogleAuthProvider, signInWithPopup } = await import("firebase/auth");
       const provider = new GoogleAuthProvider();
       const result = await signInWithPopup(getFirebaseAuth(), provider);

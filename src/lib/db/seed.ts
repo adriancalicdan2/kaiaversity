@@ -139,6 +139,8 @@ async function seed() {
       .values({
         id: adminId,
         email: "admin@kaiaversity.com",
+        username: "admin",
+        passwordHash: "fb65e99d8d722cee919e08746d8a7486:d2150b402cc3cab57f40606e9476699283e73a2cd85da0d0a76e60646d71f210b723e8d4a7a91830a71f1435184375059bd210b198f21ff8b2634ef920b80cdb", // admin123
         name: "KAIA Admin",
         role: "ADMIN",
         points: 10000,

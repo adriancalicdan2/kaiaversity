@@ -1,13 +1,13 @@
 import NextAuth from "next-auth";
-import Google from "next-auth/providers/google";
 import Credentials from "next-auth/providers/credentials";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 // Lightweight NextAuth instance for the Edge proxy.
 // It ONLY reads the JWT token — NO database calls here.
+// Providers must match the main auth config in src/lib/auth.ts.
 const { auth } = NextAuth({
-  providers: [Credentials({}), Google({})],
+  providers: [Credentials({})],
   session: { strategy: "jwt" },
   callbacks: {
     async jwt({ token }) { return token; },
