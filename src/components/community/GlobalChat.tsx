@@ -9,7 +9,8 @@ import {
   orderBy,
   limit,
   onSnapshot,
-  addDoc,
+  doc,
+  setDoc,
   serverTimestamp,
   Timestamp,
 } from "firebase/firestore";
@@ -92,7 +93,22 @@ export default function GlobalChat() {
 
     try {
       const db = getFirebaseFirestore();
-      await addDoc(collection(db, "global-chat"), {
+
+      // Format current date and time (YYYY-MM-DD_HH-mm-ss)
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, "0");
+      const day = String(now.getDate()).padStart(2, "0");
+      const hours = String(now.getHours()).padStart(2, "0");
+      const minutes = String(now.getMinutes()).padStart(2, "0");
+      const seconds = String(now.getSeconds()).padStart(2, "0");
+      const dateTimeStr = `${year}-${month}-${day}_${hours}-${minutes}-${seconds}`;
+
+      // Clean text to prevent illegal Firestore characters (e.g. forward slash)
+      const cleanText = messageText.replace(/\//g, "-").slice(0, 60);
+      const docId = `${cleanText}_${dateTimeStr}`;
+
+      await setDoc(doc(db, "global-chat", docId), {
         text: messageText,
         createdAt: serverTimestamp(),
         uid: session.user.id,
