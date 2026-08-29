@@ -7,10 +7,10 @@ import { redirect } from "next/navigation";
 import { Users, Trash2 } from "lucide-react";
 import {
   updateUserRole,
-  adjustUserPoints,
   deleteUser,
 } from "@/lib/actions/admin";
 import CreateUserModal from "@/components/admin/CreateUserModal";
+import AdjustPointsModal from "@/components/admin/AdjustPointsModal";
 
 export const metadata: Metadata = { title: "User Management — Admin" };
 
@@ -124,13 +124,13 @@ export default async function AdminUsersPage() {
                             <button type="submit" style={btnStyle("#ef4444")}>Revoke</button>
                           </form>
                         )}
-                        {/* Points */}
-                        <form action={async () => { "use server"; await adjustUserPoints(user.id, 50); }}>
-                          <button type="submit" style={btnStyle("#10b981")}>+50 pts</button>
-                        </form>
-                        <form action={async () => { "use server"; await adjustUserPoints(user.id, -50); }}>
-                          <button type="submit" style={btnStyle("#64748b")}>−50 pts</button>
-                        </form>
+                        {/* Custom Points Modal (Allows typing any custom amount) */}
+                        <AdjustPointsModal
+                          userId={user.id}
+                          userName={user.name ?? user.username ?? "Student"}
+                          currentPoints={user.points ?? 0}
+                        />
+
                         {/* Delete */}
                         <form action={async () => { "use server"; await deleteUser(user.id); }}>
                           <button type="submit" style={{ ...btnStyle("#ef4444", true), display: "flex", alignItems: "center", justifyContent: "center", padding: "4px 8px" }}>
