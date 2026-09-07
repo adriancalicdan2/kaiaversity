@@ -1,6 +1,6 @@
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { users, posts, postLikes } from "@/lib/db/schema";
+import { users, posts, postLikes, featuredReleases } from "@/lib/db/schema";
 import { eq, desc } from "drizzle-orm";
 import { KAIA_MEMBERS } from "@/lib/constants/members";
 import { DAILY_QUESTS } from "@/lib/constants/quests";
@@ -11,6 +11,7 @@ import StudentID from "@/components/dashboard/StudentID";
 import DailyQuests from "@/components/campus/DailyQuests";
 import { checkAndSyncDailyQuests } from "@/lib/actions/quests";
 import PostCard from "@/components/community/PostCard";
+import { FeaturedReleasePlayer } from "@/components/dashboard/FeaturedReleasePlayer";
 
 export const metadata: Metadata = { title: "Dashboard" };
 
@@ -26,7 +27,7 @@ export default async function DashboardPage() {
   if (!session?.user?.id) return null;
 
   // Fetch live user, recent posts, liked posts, and sync daily quests in parallel
-  const [currentUser, recentPosts, likedPosts, todayQuestStatus] = await Promise.all([
+  const [currentUser, recentPosts, likedPosts, todayQuestStatus, featuredRelease] = await Promise.all([
     db.query.users.findFirst({
       where: eq(users.id, session.user.id),
     }),
@@ -39,6 +40,7 @@ export default async function DashboardPage() {
       where: eq(postLikes.userId, session.user.id),
     }),
     checkAndSyncDailyQuests(),
+    db.query.featuredReleases.findFirst({ where: eq(featuredReleases.id, "latest-kaia-release") }),
   ]);
  
   const likedPostIds = new Set(likedPosts.map((l) => l.postId));
@@ -76,6 +78,10 @@ export default async function DashboardPage() {
               role: currentUser?.role ?? session.user.role ?? null,
             }}
           />
+
+          {featuredRelease && (
+            <FeaturedReleasePlayer title={featuredRelease.title} videoId={featuredRelease.videoId} spotifyTrackId={featuredRelease.spotifyTrackId} />
+          )}
 
           {/* Activity Feed */}
           <div>

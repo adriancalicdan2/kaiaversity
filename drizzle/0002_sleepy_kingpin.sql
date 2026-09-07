@@ -1,0 +1,1 @@
+ALTER TABLE `featured_releases` ADD `spotify_track_id` text;

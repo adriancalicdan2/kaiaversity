@@ -125,7 +125,7 @@ export default function GlobalChat() {
       setSending(false);
     }
   };
-
+  
 
 
   // Helper to style roles

@@ -12,6 +12,7 @@ import {
   Target,
   Award,
   Calendar,
+  Radio,
   Settings,
   Eye,
   LogOut
@@ -44,6 +45,7 @@ const NAV_SECTIONS = [
     group: "Events",
     items: [
       { href: "/admin/events", icon: Calendar, label: "Events" },
+      { href: "/admin/release", icon: Radio, label: "Latest Release" },
     ],
   },
 ];
@@ -149,6 +151,7 @@ export function AdminSidebar({ userName, userRole, userPoints }: Props) {
                 "/admin/quests",
                 "/admin/achievements",
                 "/admin/events",
+                "/admin/release",
               ];
               return !forbidden.includes(item.href);
             }

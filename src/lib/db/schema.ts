@@ -1,4 +1,4 @@
-import { sqliteTable, text, integer, real } from "drizzle-orm/sqlite-core";
+import { sqliteTable, text, integer, real, uniqueIndex } from "drizzle-orm/sqlite-core";
 
 // ============================================================
 // USERS
@@ -288,6 +288,45 @@ export const pointTransactions = sqliteTable("point_transactions", {
 });
 
 // ============================================================
+// FEATURED RELEASE / STREAMING REWARDS
+// ============================================================
+// A single row stores the release currently featured on the student dashboard.
+export const featuredReleases = sqliteTable("featured_releases", {
+  id: text("id").primaryKey(), // always "latest-kaia-release"
+  title: text("title").notNull(),
+  videoId: text("video_id").notNull(),
+  spotifyTrackId: text("spotify_track_id"),
+  updatedAt: integer("updated_at", { mode: "timestamp" }).$defaultFn(
+    () => new Date()
+  ),
+});
+
+// Tracks reward milestones per student and featured YouTube video.
+export const userStreamRewards = sqliteTable(
+  "user_stream_rewards",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    videoId: text("video_id").notNull(),
+    oneMinuteAwarded: integer("one_minute_awarded", { mode: "boolean" })
+      .default(false)
+      .notNull(),
+    completedAwarded: integer("completed_awarded", { mode: "boolean" })
+      .default(false)
+      .notNull(),
+    oneMinuteAwardedAt: integer("one_minute_awarded_at", { mode: "timestamp" }),
+    completedAwardedAt: integer("completed_awarded_at", { mode: "timestamp" }),
+  },
+  (table) => [
+    uniqueIndex("user_stream_rewards_user_video_unique").on(table.userId, table.videoId),
+  ]
+);
+
+// ============================================================
 // COURSES
 // ============================================================
 export const courses = sqliteTable("courses", {
@@ -557,3 +596,4 @@ export type CourseSubmission = typeof courseSubmissions.$inferSelect;
 export type CourseBadge = typeof courseBadges.$inferSelect;
 export type UserCourseBadge = typeof userCourseBadges.$inferSelect;
 export type CourseQuizAttempt = typeof quizAttempts.$inferSelect;
+export type FeaturedRelease = typeof featuredReleases.$inferSelect;
